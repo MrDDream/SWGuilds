@@ -22,7 +22,9 @@ services:
       - ./prisma:/app/prisma
       - ./public/uploads:/app/public/uploads
     restart: unless-stopped
-    command: sh -c "mkdir -p /app/public/uploads/profiles /app/public/uploads/monsters /app/public/data && prisma migrate deploy || true && (npx tsx scripts/create-admin.ts || true) && (npx tsx scripts/download-all-monsters-and-images.ts &) && node scripts/reminder-cron.js & node server.js"
+    # Exécuter en root pour gérer les permissions, puis passer à nextjs
+    user: "0:0"
+    command: sh -c "mkdir -p /app/public/uploads/profiles /app/public/uploads/monsters /app/public/uploads/json /app/public/data && chown -R 1001:1001 /app/public/uploads /app/prisma 2>/dev/null || true && chmod -R 755 /app/public/uploads /app/prisma 2>/dev/null || true && exec su -s /bin/sh nextjs -c 'cd /app && prisma migrate deploy || true && (npx tsx scripts/create-admin.ts || true) && (npx tsx scripts/download-all-monsters-and-images.ts &) && node scripts/reminder-cron.js & node server.js'"
     working_dir: /app
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"]
