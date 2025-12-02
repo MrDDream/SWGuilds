@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* React Resizable styles */
+.react-resizable {
+  position: relative;
+}
+
+.react-resizable-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #3b82f6;
+  border: 2px solid #60a5fa;
+  border-radius: 2px;
+}
+
+.react-resizable-handle-se {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+  width: 20px !important;
+  height: 20px !important;
+  background-color: #3b82f6 !important;
+  border: 2px solid #60a5fa !important;
+  border-radius: 4px !important;
+  z-index: 1000 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.react-resizable-handle-se::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 8px 8px;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+.react-resizable-handle-sw {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+
+.react-resizable-handle-ne {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+
+.react-resizable-handle-nw {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+
+.react-resizable-handle-e {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+
+.react-resizable-handle-w {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
+
+.react-resizable-handle-n {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+
+.react-resizable-handle-s {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+
+:root {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+

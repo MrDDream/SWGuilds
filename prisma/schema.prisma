@@ -1,0 +1,232 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  identifier    String         @unique
+  name          String?
+  password      String
+  role          String         @default("user") // "admin" or "user"
+  isApproved    Boolean        @default(false)
+  lastLogin     DateTime?
+  avatarUrl     String?
+  preferredLocale String?      // "fr" ou "en"
+  lastJsonUpload DateTime?     // Date du dernier upload JSON
+  apiKey        String?        @unique // Clé API pour SWExporter
+  canEditAllDefenses Boolean   @default(false)
+  canEditMap    Boolean        @default(false)
+  canEditAssignments Boolean   @default(false)
+  canEditNews   Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  defenses      Defense[]
+  logs          ActivityLog[]
+  defenseVotes  DefenseVote[]
+  counterVotes  CounterVote[]
+  calendarEvents CalendarEvent[]
+  manualMonsters UserMonster[]
+  defenseAssignments DefenseAssignment[]
+}
+
+model Defense {
+  id                String        @id @default(cuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leaderMonster     String
+  monster2          String
+  monster3          String
+  strengths         String?
+  weaknesses        String?
+  attackSequence    String?
+  notes             String?
+  pinnedToDashboard Boolean       @default(false)
+  isPublic          Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  createdBy         String
+  updatedBy         String
+  counters          Counter[]
+  tags              DefenseTag[]
+  votes             DefenseVote[]
+  assignments       DefenseAssignment[]
+}
+
+model Counter {
+  id             String        @id @default(cuid())
+  defenseId      String
+  defense        Defense       @relation(fields: [defenseId], references: [id], onDelete: Cascade)
+  counterMonsters String       // JSON array of monster names
+  description    String?
+  createdBy      String
+  updatedBy      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime      @updatedAt
+  votes          CounterVote[]
+}
+
+model Tag {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  color     String      @default("#3B82F6")
+  createdAt DateTime    @default(now())
+  defenses  DefenseTag[]
+}
+
+model DefenseTag {
+  id        String   @id @default(cuid())
+  defenseId String
+  tagId     String
+  defense   Defense  @relation(fields: [defenseId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([defenseId, tagId])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // "create", "update", "delete", "approve", "reject", etc.
+  entityType String  // "user", "defense", "counter", etc.
+  entityId  String?
+  details   String?  // JSON string with additional details
+  createdAt DateTime @default(now())
+}
+
+model DefenseVote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defenseId String
+  defense   Defense  @relation(fields: [defenseId], references: [id], onDelete: Cascade)
+  voteType  String   // "like" or "dislike"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, defenseId])
+}
+
+model CounterVote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  counterId String
+  counter   Counter  @relation(fields: [counterId], references: [id], onDelete: Cascade)
+  voteType  String   // "like" or "dislike"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, counterId])
+}
+
+model HomePage {
+  id        String   @id @default(cuid())
+  content   String   @default("")
+  updatedAt DateTime @default(now()) @updatedAt
+  updatedBy String
+}
+
+model Settings {
+  id                    String   @id @default(cuid())
+  instanceName          String   @default("SW Defenses")
+  logoUrl               String?
+  approvalWebhookUrl    String?
+  approvalWebhookRoleId String?
+  newsWebhookUrl        String?
+  newsWebhookRoleId     String?
+  discordWebhookUrl     String?
+  updatedAt             DateTime @default(now()) @updatedAt
+  updatedBy             String
+}
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType   String   // "absence" ou "autre"
+  startDate   DateTime
+  endDate     DateTime
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Reminder {
+  id            String   @id @default(cuid())
+  title         String   // Titre du rappel
+  message       String   // Message à envoyer
+  daysOfWeek    String   // JSON array des jours de la semaine (0=dimanche, 1=lundi, etc.) : "[1,3,5]"
+  hour          Int      // Heure (0-23)
+  minute        Int      @default(0) // Minute (0-59)
+  discordRoleId String?  // ID du rôle Discord à ping (optionnel)
+  webhookUrl    String   // URL du webhook Discord
+  isActive      Boolean  @default(true) // Activer/désactiver le rappel
+  lastSent      DateTime? // Dernière fois que le rappel a été envoyé
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     String   // ID de l'utilisateur qui a créé le rappel
+}
+
+model MapTower {
+  id          String   @id @default(cuid())
+  mapName     String   // Nom de la map (ex: "map.png", "map_tournament.png")
+  towerNumber String   // Numéro de la tour ("QG" ou "1" à "12")
+  name        String?  // Nom personnalisé de la tour
+  stars       Int      @default(5) // 4 ou 5 étoiles
+  color       String   @default("blue") // "blue", "red", ou "yellow"
+  x           Float    // Position X sur la map en pixels
+  y           Float    // Position Y sur la map en pixels
+  width       Float    @default(150) // Largeur en pixels
+  height      Float    @default(100) // Hauteur en pixels
+  defenseIds  String   @default("[]") // JSON array d'objets { defenseId: string, userId: string } (max 5)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   // ID utilisateur
+
+  @@index([mapName])
+}
+
+model UserMonster {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monsterName String // Nom du monstre (ex: "Leo")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, monsterName])
+  @@index([userId])
+}
+
+model DefenseAssignment {
+  id        String   @id @default(cuid())
+  defenseId String
+  defense   Defense  @relation(fields: [defenseId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+  assignedBy String
+  
+  @@unique([defenseId, userId])
+}
+
+model NewsPost {
+  id        String   @id @default(cuid())
+  title     String?  // Titre du post
+  content   String   // Contenu markdown
+  isPinned  Boolean  @default(false)
+  createdBy String   // userId
+  updatedBy String   // userId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
