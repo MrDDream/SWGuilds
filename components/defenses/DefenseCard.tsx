@@ -6,6 +6,7 @@ import { Defense } from '@/types/defense'
 import { VoteButtons } from '@/components/ui/VoteButtons'
 import { getMonstersFromCache, preloadMonsterImages, getAllMonsterImages } from '@/lib/monster-cache'
 import { useI18n } from '@/lib/i18n-provider'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 
 interface DefenseCardProps {
   defense: Defense
@@ -60,7 +61,9 @@ export function DefenseCard({ defense }: DefenseCardProps) {
     
     // Si c'est une URL locale qui échoue, essayer Swarfarm
     const monsters = getAllMonsterImages()
-    const swarfarmUrl = monsters[monsterName]
+    // Chercher l'URL Swarfarm avec la clé de fallback
+    const swarfarmKey = `${monsterName}_swarfarm`
+    const swarfarmUrl = monsters[swarfarmKey] || monsters[monsterName]
     if (swarfarmUrl && swarfarmUrl.includes('swarfarm.com')) {
       img.src = swarfarmUrl
       return
@@ -118,19 +121,19 @@ export function DefenseCard({ defense }: DefenseCardProps) {
             <div className="w-16 h-16 flex-shrink-0">
               {renderMonsterIcon(defense.leaderMonster, t('defenses.leader'))}
             </div>
-            <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] block bg-slate-900/70 px-1.5 py-0.5 rounded">{defense.leaderMonster}</span>
+            <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] block bg-slate-900/70 px-1.5 py-0.5 rounded">{getMonsterDisplayName(defense.leaderMonster)}</span>
           </div>
           <div className="flex flex-col items-center min-w-[96px] flex-shrink-0">
             <div className="w-16 h-16 flex-shrink-0">
               {renderMonsterIcon(defense.monster2, t('defenses.monster2'))}
             </div>
-            <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] block bg-slate-900/70 px-1.5 py-0.5 rounded">{defense.monster2}</span>
+            <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] block bg-slate-900/70 px-1.5 py-0.5 rounded">{getMonsterDisplayName(defense.monster2)}</span>
           </div>
           <div className="flex flex-col items-center min-w-[96px] flex-shrink-0">
             <div className="w-16 h-16 flex-shrink-0">
               {renderMonsterIcon(defense.monster3, t('defenses.monster3'))}
             </div>
-            <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] block bg-slate-900/70 px-1.5 py-0.5 rounded">{defense.monster3}</span>
+            <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] block bg-slate-900/70 px-1.5 py-0.5 rounded">{getMonsterDisplayName(defense.monster3)}</span>
           </div>
         </div>
       </Link>

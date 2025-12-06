@@ -1,35 +1,21 @@
 services:
-  app:
+  swguilds:
     image: ghcr.io/mrddream/swguilds:latest
-    container_name: SwGuilds
+    container_name: SWGuilds
     ports:
-      # EXTERNAL_PORT contrôle le port exposé à l'extérieur du container (par défaut 3020)
-      # 3000 est le port interne utilisé par Next.js dans le container
       - "${EXTERNAL_PORT:-3020}:3000"
     env_file:
       - .env
     environment:
       - DATABASE_URL=file:/app/prisma/dev.db
-      - NEXTAUTH_URL=http://localhost:${EXTERNAL_PORT:-3020}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-this-secret-in-production}
       - NODE_ENV=production
-      - LOCALE=${LOCALE:-fr}
-      - ADMIN_ID=${ADMIN_ID:-}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
-      - ADMIN_NAME=${ADMIN_NAME:-Admin}
-      - TIMEZONE=${TIMEZONE:-Europe/Paris}
+      - NEXTAUTH_URL=http://localhost:${EXTERNAL_PORT:-3020}
     volumes:
-      - ./prisma:/app/prisma
-      - ./public/uploads:/app/public/uploads
+      - prisma_data:/app/prisma
+      - data_public:/app/public
     restart: unless-stopped
-    # Exécuter en root pour gérer les permissions, puis passer à nextjs
-    user: "0:0"
-    command: sh -c "mkdir -p /app/public/uploads/profiles /app/public/uploads/monsters /app/public/uploads/json /app/public/data && chown -R 1001:1001 /app/public/uploads /app/prisma 2>/dev/null || true && chmod -R 755 /app/public/uploads /app/prisma 2>/dev/null || true && exec su -s /bin/sh nextjs -c 'cd /app && prisma migrate deploy || true && (npx tsx scripts/create-admin.ts || true) && (npx tsx scripts/download-all-monsters-and-images.ts &) && node scripts/reminder-cron.js & node server.js'"
-    working_dir: /app
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+
+volumes:
+  prisma_data:
+  data_public:
 

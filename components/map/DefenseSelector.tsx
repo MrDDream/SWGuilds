@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Defense } from '@/types/defense'
 import { getMonstersFromCache, preloadMonsterImages, getAllMonsterImages } from '@/lib/monster-cache'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 
 interface DefenseSelectorProps {
   onSelect: (defenseId: string) => void
@@ -64,18 +65,19 @@ export function DefenseSelector({ onSelect, excludeIds = [] }: DefenseSelectorPr
   const renderMonsterIcon = (monsterName: string, fallbackText: string) => {
     const imageUrl = monsterImages[monsterName]
     const hasFailed = failedImages.has(monsterName)
+    const displayName = getMonsterDisplayName(monsterName)
     
     return (
       <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden relative border-2 border-slate-600 flex-shrink-0">
         {imageUrl && !hasFailed ? (
           <img
             src={imageUrl}
-            alt={monsterName || fallbackText}
+            alt={displayName || fallbackText}
             className="w-full h-full object-cover"
             onError={(e) => handleImageError(e, monsterName)}
           />
         ) : (
-          <span className="text-xs text-center text-white px-1">{monsterName || fallbackText}</span>
+          <span className="text-xs text-center text-white px-1">{displayName || fallbackText}</span>
         )}
       </div>
     )
@@ -96,10 +98,15 @@ export function DefenseSelector({ onSelect, excludeIds = [] }: DefenseSelectorPr
   }
 
   const filteredDefenses = defenses.filter(defense => {
-    const matchesSearch = searchTerm === '' || 
-      defense.leaderMonster.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      defense.monster2.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      defense.monster3.toLowerCase().includes(searchTerm.toLowerCase())
+    if (searchTerm === '') {
+      return !excludeIds.includes(defense.id)
+    }
+    const searchLower = searchTerm.toLowerCase()
+    // Rechercher dans les noms d'affichage (sans les IDs)
+    const leaderName = getMonsterDisplayName(defense.leaderMonster).toLowerCase()
+    const monster2Name = getMonsterDisplayName(defense.monster2).toLowerCase()
+    const monster3Name = getMonsterDisplayName(defense.monster3).toLowerCase()
+    const matchesSearch = leaderName.includes(searchLower) || monster2Name.includes(searchLower) || monster3Name.includes(searchLower)
     const notExcluded = !excludeIds.includes(defense.id)
     return matchesSearch && notExcluded
   })
@@ -137,7 +144,7 @@ export function DefenseSelector({ onSelect, excludeIds = [] }: DefenseSelectorPr
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-white font-medium truncate">
-                    {defense.leaderMonster} / {defense.monster2} / {defense.monster3}
+                    {getMonsterDisplayName(defense.leaderMonster)} / {getMonsterDisplayName(defense.monster2)} / {getMonsterDisplayName(defense.monster3)}
                   </div>
                   {defense.tags && defense.tags.length > 0 && (
                     <div className="flex gap-1 mt-1 flex-wrap">

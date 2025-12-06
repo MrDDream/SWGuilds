@@ -57,7 +57,11 @@ export async function GET() {
     }
 
     return NextResponse.json(user)
-  } catch (error) {
+  } catch (error: any) {
+    // Ne pas logger les erreurs NEXT_REDIRECT (redirections normales de Next.js)
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error // Re-lancer la redirection pour qu'elle soit gérée par Next.js
+    }
     console.error('Erreur lors de la récupération du profil:', error)
     return NextResponse.json(
       { error: 'Erreur serveur' },
@@ -185,7 +189,11 @@ export async function PUT(request: NextRequest) {
       message: 'Profil mis à jour avec succès',
       user: updatedUser,
     })
-  } catch (error) {
+  } catch (error: any) {
+    // Ne pas logger les erreurs NEXT_REDIRECT (redirections normales de Next.js)
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error // Re-lancer la redirection pour qu'elle soit gérée par Next.js
+    }
     console.error('Erreur lors de la mise à jour du profil:', error)
     return NextResponse.json(
       { error: 'Erreur serveur' },
@@ -235,7 +243,11 @@ export async function POST(request: NextRequest) {
       { error: 'Action non reconnue' },
       { status: 400 }
     )
-  } catch (error) {
+  } catch (error: any) {
+    // Ne pas logger les erreurs NEXT_REDIRECT (redirections normales de Next.js)
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error // Re-lancer la redirection pour qu'elle soit gérée par Next.js
+    }
     console.error('Erreur lors de la régénération de la clé API:', error)
     return NextResponse.json(
       { error: 'Erreur serveur' },

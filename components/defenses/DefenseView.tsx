@@ -9,6 +9,7 @@ import { VoteButtons } from '@/components/ui/VoteButtons'
 import { getMonstersFromCache, preloadMonsterImages, getAllMonsterImages } from '@/lib/monster-cache'
 import { useUserPermissions } from '@/hooks/useUserPermissions'
 import { useI18n } from '@/lib/i18n-provider'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 
 interface DefenseViewProps {
   defense: Defense
@@ -32,6 +33,7 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
   const [activeTab, setActiveTab] = useState<'apercu' | 'contres'>('apercu')
   const [counters, setCounters] = useState<Counter[]>(defense?.counters || [])
   const [loadingCounters, setLoadingCounters] = useState(false)
+  const [countersLoaded, setCountersLoaded] = useState(false)
   
   // Tous les utilisateurs peuvent ajouter des contres aux défenses publiques
   const canAddCounter = defense.isPublic || (session?.user?.id ? canEditDefensePermission(defense.userId, session.user.id) : false)
@@ -78,6 +80,8 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
   }, [fetchMonsterImages])
 
   const fetchCounters = useCallback(async () => {
+    if (loadingCounters || countersLoaded) return // Éviter les appels multiples
+    
     setLoadingCounters(true)
     try {
       const response = await fetch(`/api/defenses/${defense.id}/counters`)
@@ -92,6 +96,7 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
           likes: counter.likes || 0, // Inclure le nombre de likes
         }))
         setCounters(countersWithFields || [])
+        setCountersLoaded(true)
         const allCounterMonsters: string[] = []
         data.forEach((counter: Counter) => {
           const monsters = JSON.parse(counter.counterMonsters)
@@ -106,25 +111,27 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
     } finally {
       setLoadingCounters(false)
     }
-  }, [defense.id, fetchMonsterImagesForCounters])
+  }, [defense.id, fetchMonsterImagesForCounters, loadingCounters, countersLoaded])
 
   useEffect(() => {
-    if (activeTab === 'contres') {
-      if (counters.length === 0) {
-        fetchCounters()
-      } else {
-        // Si les contres sont déjà chargés, charger les images
-        const allCounterMonsters: string[] = []
-        counters.forEach((counter: Counter) => {
-          const monsters = JSON.parse(counter.counterMonsters)
-          allCounterMonsters.push(...monsters)
-        })
-        if (allCounterMonsters.length > 0) {
-          fetchMonsterImagesForCounters(allCounterMonsters)
-        }
+    if (activeTab === 'contres' && !countersLoaded && !loadingCounters) {
+      fetchCounters()
+    }
+  }, [activeTab, countersLoaded, loadingCounters, fetchCounters])
+  
+  // Charger les images des contres quand ils sont chargés
+  useEffect(() => {
+    if (activeTab === 'contres' && counters.length > 0 && countersLoaded) {
+      const allCounterMonsters: string[] = []
+      counters.forEach((counter: Counter) => {
+        const monsters = JSON.parse(counter.counterMonsters)
+        allCounterMonsters.push(...monsters)
+      })
+      if (allCounterMonsters.length > 0) {
+        fetchMonsterImagesForCounters(allCounterMonsters)
       }
     }
-  }, [activeTab, counters, fetchMonsterImagesForCounters, fetchCounters])
+  }, [activeTab, counters, countersLoaded, fetchMonsterImagesForCounters])
 
   const handleDeleteCounter = async (counterId: string) => {
     if (!confirm(t('defenses.deleteConfirm'))) return
@@ -150,8 +157,9 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
   }
 
   // Trier les contres par likes si ils viennent de defense.counters (initial)
+  // Ne s'exécute qu'une seule fois au chargement initial
   useEffect(() => {
-    if (defense?.counters && defense.counters.length > 0) {
+    if (defense?.counters && defense.counters.length > 0 && !countersLoaded) {
       // Les contres sont déjà triés par transformDefense, mais on s'assure qu'ils ont les champs likes et dislikes
       const countersWithVotes = defense.counters.map((counter: any) => ({
         ...counter,
@@ -159,8 +167,9 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
         dislikes: counter.dislikes || 0,
       }))
       setCounters(countersWithVotes)
+      setCountersLoaded(true) // Marquer comme chargé pour éviter de recharger
     }
-  }, [defense?.counters])
+  }, [defense?.counters, countersLoaded])
 
 
   const formatDate = (date: string) => {
@@ -189,7 +198,9 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
     
     // Si c'est une URL locale qui échoue, essayer Swarfarm
     const monsters = getAllMonsterImages()
-    const swarfarmUrl = monsters[monsterName]
+    // Chercher l'URL Swarfarm avec la clé de fallback
+    const swarfarmKey = `${monsterName}_swarfarm`
+    const swarfarmUrl = monsters[swarfarmKey] || monsters[monsterName]
     if (swarfarmUrl && swarfarmUrl.includes('swarfarm.com')) {
       img.src = swarfarmUrl
       return
@@ -295,19 +306,19 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
                     <div className="w-16 h-16 flex-shrink-0">
                       {renderMonsterIcon(defense.leaderMonster, t('defenses.leader'))}
                     </div>
-                    <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{defense.leaderMonster}</span>
+                    <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{getMonsterDisplayName(defense.leaderMonster)}</span>
                   </div>
                   <div className="flex flex-col items-center min-w-[80px] flex-shrink-0">
                     <div className="w-16 h-16 flex-shrink-0">
                       {renderMonsterIcon(defense.monster2, t('defenses.monster2'))}
                     </div>
-                    <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{defense.monster2}</span>
+                    <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{getMonsterDisplayName(defense.monster2)}</span>
                   </div>
                   <div className="flex flex-col items-center min-w-[80px] flex-shrink-0">
                     <div className="w-16 h-16 flex-shrink-0">
                       {renderMonsterIcon(defense.monster3, t('defenses.monster3'))}
                     </div>
-                    <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{defense.monster3}</span>
+                    <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{getMonsterDisplayName(defense.monster3)}</span>
                   </div>
                 </div>
               </div>
@@ -396,19 +407,19 @@ export function DefenseView({ defense, onEdit, canEditDefense = false }: Defense
                               <div className="w-16 h-16 flex-shrink-0">
                                 {renderMonsterIcon(leader || '', 'Leader')}
                               </div>
-                              <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{leader || t('defenses.leader')}</span>
+                              <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{getMonsterDisplayName(leader) || t('defenses.leader')}</span>
                             </div>
                             <div className="flex flex-col items-center min-w-[80px] flex-shrink-0">
                               <div className="w-16 h-16 flex-shrink-0">
                                 {renderMonsterIcon(monster2 || '', 'Monstre 2')}
                               </div>
-                              <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{monster2 || t('defenses.monster2')}</span>
+                              <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{getMonsterDisplayName(monster2) || t('defenses.monster2')}</span>
                             </div>
                             <div className="flex flex-col items-center min-w-[80px] flex-shrink-0">
                               <div className="w-16 h-16 flex-shrink-0">
                                 {renderMonsterIcon(monster3 || '', 'Monstre 3')}
                               </div>
-                              <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{monster3 || t('defenses.monster3')}</span>
+                              <span className="text-xs sm:text-sm text-white mt-2 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] block">{getMonsterDisplayName(monster3) || t('defenses.monster3')}</span>
                             </div>
                           </div>
                           {counter.description && (

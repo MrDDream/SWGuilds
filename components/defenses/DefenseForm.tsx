@@ -13,6 +13,7 @@ import { ListInput } from '@/components/ui/ListInput'
 import { VoteButtons } from '@/components/ui/VoteButtons'
 import { getMonstersFromCache, preloadMonsterImages, getAllMonsterImages } from '@/lib/monster-cache'
 import { useUserPermissions } from '@/hooks/useUserPermissions'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 import { useI18n } from '@/lib/i18n-provider'
 
 interface DefenseFormProps {
@@ -357,7 +358,7 @@ export function DefenseForm({ defense, isNew = false, onCancel, onSave, initialT
                     {monsterImages[leaderMonster] ? (
                       <img
                         src={monsterImages[leaderMonster]}
-                        alt={leaderMonster || t('defenses.leader')}
+                        alt={getMonsterDisplayName(leaderMonster) || t('defenses.leader')}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none'
@@ -365,14 +366,14 @@ export function DefenseForm({ defense, isNew = false, onCancel, onSave, initialT
                         }}
                       />
                     ) : (
-                      <span className="text-xs text-center text-white">{leaderMonster || t('defenses.leader')}</span>
+                      <span className="text-xs text-center text-white">{getMonsterDisplayName(leaderMonster) || t('defenses.leader')}</span>
                     )}
                   </div>
                   <div className="w-16 h-16 bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
                     {monsterImages[monster2] ? (
                       <img
                         src={monsterImages[monster2]}
-                        alt={monster2 || 'Monstre 2'}
+                        alt={getMonsterDisplayName(monster2) || 'Monstre 2'}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none'
@@ -380,14 +381,14 @@ export function DefenseForm({ defense, isNew = false, onCancel, onSave, initialT
                         }}
                       />
                     ) : (
-                      <span className="text-xs text-center text-white">{monster2 || t('defenses.monster2')}</span>
+                      <span className="text-xs text-center text-white">{getMonsterDisplayName(monster2) || t('defenses.monster2')}</span>
                     )}
                   </div>
                   <div className="w-16 h-16 bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
                     {monsterImages[monster3] ? (
                       <img
                         src={monsterImages[monster3]}
-                        alt={monster3 || 'Monstre 3'}
+                        alt={getMonsterDisplayName(monster3) || 'Monstre 3'}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none'
@@ -395,7 +396,7 @@ export function DefenseForm({ defense, isNew = false, onCancel, onSave, initialT
                         }}
                       />
                     ) : (
-                      <span className="text-xs text-center text-white">{monster3 || t('defenses.monster3')}</span>
+                      <span className="text-xs text-center text-white">{getMonsterDisplayName(monster3) || t('defenses.monster3')}</span>
                     )}
                   </div>
                 </div>
@@ -635,7 +636,7 @@ export function DefenseForm({ defense, isNew = false, onCancel, onSave, initialT
                                               <span className="text-xs text-center text-white px-1">{monster2 || t('defenses.monster2')}</span>
                                             )}
                                           </div>
-                                          <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px]">{monster2 || t('defenses.monster2')}</span>
+                                          <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px]">{getMonsterDisplayName(monster2) || t('defenses.monster2')}</span>
                                         </div>
                                         <div className="flex flex-col items-center min-w-[96px] flex-shrink-0">
                                           <div className="w-16 h-16 bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden relative flex-shrink-0">
@@ -646,10 +647,10 @@ export function DefenseForm({ defense, isNew = false, onCancel, onSave, initialT
                                                 className="w-full h-full object-cover"
                                               />
                                             ) : (
-                                              <span className="text-xs text-center text-white px-1">{monster3 || t('defenses.monster3')}</span>
+                                              <span className="text-xs text-center text-white px-1">{getMonsterDisplayName(monster3) || t('defenses.monster3')}</span>
                                             )}
                                           </div>
-                                          <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px]">{monster3 || t('defenses.monster3')}</span>
+                                          <span className="text-sm text-white mt-2.5 text-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px]">{getMonsterDisplayName(monster3) || t('defenses.monster3')}</span>
                                         </div>
                                       </>
                                     )

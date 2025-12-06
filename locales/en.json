@@ -49,7 +49,7 @@
     "login": "Login",
     "register": "Sign up",
     "logout": "Logout",
-    "email": "Email",
+    "email": "Identifier",
     "password": "Password",
     "name": "Username",
     "forgotPassword": "Forgot password?",
@@ -64,7 +64,7 @@
     "notApproved": "Your account has not been approved by an administrator yet",
     "pendingApproval": "Your account has been created. An administrator must approve it before you can log in.",
     "accountCreated": "Account created successfully! You can now log in.",
-    "incorrectCredentials": "Incorrect email or password",
+    "incorrectCredentials": "Incorrect identifier or password",
     "errorOccurred": "An error occurred"
   },
   "navbar": {

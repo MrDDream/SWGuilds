@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getMonstersFromCache, preloadMonsterImages, getAllMonsterImages } from '@/lib/monster-cache'
 import { useI18n } from '@/lib/i18n-provider'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 
 interface Assignment {
   defenseId: string
@@ -108,18 +109,19 @@ export function AssignmentSelector({ onSelect, excludeAssignments = [], allTower
   const renderMonsterIcon = (monsterName: string, fallbackText: string) => {
     const imageUrl = monsterImages[monsterName]
     const hasFailed = failedImages.has(monsterName)
+    const displayName = getMonsterDisplayName(monsterName)
     
     return (
       <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden relative border-2 border-slate-600 flex-shrink-0">
         {imageUrl && !hasFailed ? (
           <img
             src={imageUrl}
-            alt={monsterName || fallbackText}
+            alt={displayName || fallbackText}
             className="w-full h-full object-cover"
             onError={(e) => handleImageError(e, monsterName)}
           />
         ) : (
-          <span className="text-xs text-center text-white px-1">{monsterName || fallbackText}</span>
+          <span className="text-xs text-center text-white px-1">{displayName || fallbackText}</span>
         )}
       </div>
     )
@@ -140,11 +142,13 @@ export function AssignmentSelector({ onSelect, excludeAssignments = [], allTower
   }
 
   const filteredAssignments = assignments.filter(assignment => {
-    const matchesSearch = searchTerm === '' || 
-      assignment.defense.leaderMonster.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assignment.defense.monster2.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assignment.defense.monster3.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch
+    if (searchTerm === '') return true
+    const searchLower = searchTerm.toLowerCase()
+    // Rechercher dans les noms d'affichage (sans les IDs)
+    const leaderName = getMonsterDisplayName(assignment.defense.leaderMonster).toLowerCase()
+    const monster2Name = getMonsterDisplayName(assignment.defense.monster2).toLowerCase()
+    const monster3Name = getMonsterDisplayName(assignment.defense.monster3).toLowerCase()
+    return leaderName.includes(searchLower) || monster2Name.includes(searchLower) || monster3Name.includes(searchLower)
   })
 
   const selectedAssignment = selectedDefenseId 
@@ -228,7 +232,7 @@ export function AssignmentSelector({ onSelect, excludeAssignments = [], allTower
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm text-white font-medium truncate">
-                {selectedAssignment.defense.leaderMonster} / {selectedAssignment.defense.monster2} / {selectedAssignment.defense.monster3}
+                {getMonsterDisplayName(selectedAssignment.defense.leaderMonster)} / {getMonsterDisplayName(selectedAssignment.defense.monster2)} / {getMonsterDisplayName(selectedAssignment.defense.monster3)}
               </div>
             </div>
           </div>
@@ -293,7 +297,7 @@ export function AssignmentSelector({ onSelect, excludeAssignments = [], allTower
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-white font-medium truncate">
-                    {assignment.defense.leaderMonster} / {assignment.defense.monster2} / {assignment.defense.monster3}
+                    {getMonsterDisplayName(assignment.defense.leaderMonster)} / {getMonsterDisplayName(assignment.defense.monster2)} / {getMonsterDisplayName(assignment.defense.monster3)}
                   </div>
                   <div className="text-xs text-gray-400 mt-1">
                     {assignment.users.length} {assignment.users.length > 1 ? t('map.users') || 'utilisateurs' : t('map.user') || 'utilisateur'}

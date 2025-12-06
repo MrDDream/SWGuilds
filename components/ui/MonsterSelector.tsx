@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getMonstersFromCache } from '@/lib/monster-cache'
 import { useI18n } from '@/lib/i18n-provider'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 
 interface Monster {
   id: number
@@ -45,9 +46,19 @@ export function MonsterSelector({
   }, [])
 
   useEffect(() => {
-    // Trouver le monstre sélectionné par nom
+    // Trouver le monstre sélectionné par nom ou par clé composite (nom|id)
     if (value && monsters.length > 0) {
-      const monster = monsters.find(m => m.name === value)
+      // Essayer d'abord avec la clé composite (nom|id)
+      let monster: Monster | undefined
+      if (value.includes('|')) {
+        const [name, idStr] = value.split('|')
+        const id = parseInt(idStr, 10)
+        monster = monsters.find(m => m.name === name && m.id === id)
+      }
+      // Sinon, essayer avec le nom seul (pour compatibilité avec les anciennes données)
+      if (!monster) {
+        monster = monsters.find(m => m.name === value)
+      }
       setSelectedMonster(monster || null)
     } else {
       setSelectedMonster(null)
@@ -94,7 +105,8 @@ export function MonsterSelector({
 
   const handleSelectMonster = (monster: Monster) => {
     setSelectedMonster(monster)
-    onChange(monster.name)
+    // Utiliser une clé composite "nom|id" pour identifier de manière unique chaque variante
+    onChange(`${monster.name}|${monster.id}`)
     setIsOpen(false)
     setSearchQuery('')
   }
@@ -148,7 +160,7 @@ export function MonsterSelector({
           )}
           <input
             type="text"
-            value={isOpen ? searchQuery : (selectedMonster?.name || value || '')}
+            value={isOpen ? searchQuery : (selectedMonster?.name || getMonsterDisplayName(value) || '')}
             onChange={(e) => {
               setSearchQuery(e.target.value)
               if (!isOpen) setIsOpen(true)

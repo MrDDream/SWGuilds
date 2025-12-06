@@ -8,6 +8,7 @@ import { Defense } from '@/types/defense'
 import { useRouter } from 'next/navigation'
 import { getMonstersFromCache, preloadMonsterImages, getAllMonsterImages } from '@/lib/monster-cache'
 import { useI18n } from '@/lib/i18n-provider'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 
 interface MapTower {
   id: string
@@ -430,7 +431,7 @@ export function TowerConfigModal({ tower, onClose, onSave, onDelete, allTowers =
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-white font-medium truncate">
-                              {defense.leaderMonster} / {defense.monster2} / {defense.monster3}
+                              {getMonsterDisplayName(defense.leaderMonster)} / {getMonsterDisplayName(defense.monster2)} / {getMonsterDisplayName(defense.monster3)}
                             </div>
                             {userName && (
                               <div className="text-xs text-blue-400 mt-1">

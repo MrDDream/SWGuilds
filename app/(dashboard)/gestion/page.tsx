@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { getMonstersFromCache, preloadMonsterImages } from '@/lib/monster-cache'
 import { useUserPermissions } from '@/hooks/useUserPermissions'
 import { useI18n } from '@/lib/i18n-provider'
+import { getMonsterDisplayName } from '@/lib/monster-utils'
 
 interface EligibleUser {
   id: string
@@ -99,11 +100,13 @@ export default function GestionPage() {
   const filteredDefenses = useMemo(() => {
     if (!defenseFilter.trim()) return []
     const filterLower = defenseFilter.toLowerCase()
-    return defenses.filter(defense => 
-      defense.leaderMonster.toLowerCase().includes(filterLower) ||
-      defense.monster2.toLowerCase().includes(filterLower) ||
-      defense.monster3.toLowerCase().includes(filterLower)
-    )
+    return defenses.filter(defense => {
+      // Rechercher dans les noms d'affichage (sans les IDs)
+      const leaderName = getMonsterDisplayName(defense.leaderMonster).toLowerCase()
+      const monster2Name = getMonsterDisplayName(defense.monster2).toLowerCase()
+      const monster3Name = getMonsterDisplayName(defense.monster3).toLowerCase()
+      return leaderName.includes(filterLower) || monster2Name.includes(filterLower) || monster3Name.includes(filterLower)
+    })
   }, [defenses, defenseFilter])
 
   // Filtrer les affectations selon "Mes affectations"
@@ -439,7 +442,7 @@ export default function GestionPage() {
                           </div>
                           <div className="text-left flex-1">
                             <div className="text-white text-sm">
-                              {defense.leaderMonster} / {defense.monster2} / {defense.monster3}
+                              {getMonsterDisplayName(defense.leaderMonster)} / {getMonsterDisplayName(defense.monster2)} / {getMonsterDisplayName(defense.monster3)}
                             </div>
                           </div>
                         </button>

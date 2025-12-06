@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin, isEnvAdmin } from '@/lib/auth-helpers'
+import { handleApiError } from '@/lib/error-handler'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,11 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(users)
   } catch (error) {
-    console.error('Erreur lors de la récupération des utilisateurs:', error)
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    )
+    return handleApiError(error, 'Erreur lors de la récupération des utilisateurs:')
   }
 }
 
@@ -105,11 +102,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedUser)
   } catch (error) {
-    console.error('Erreur lors de la mise à jour de l\'utilisateur:', error)
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    )
+    return handleApiError(error, 'Erreur lors de la mise à jour de l\'utilisateur:')
   }
 }
 

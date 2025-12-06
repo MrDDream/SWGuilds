@@ -73,8 +73,12 @@ export default function CalendarPage() {
       const monthStr = String(month + 1).padStart(2, '0')
       const response = await fetch(`/api/calendar?month=${monthStr}&year=${year}`)
       if (response.ok) {
-        const data = await response.json()
-        setEvents(data)
+        const data = await response.json() as CalendarEvent[]
+        // Dédupliquer les événements par ID pour éviter les doublons
+        const uniqueEvents: CalendarEvent[] = Array.from(
+          new Map(data.map((event: CalendarEvent) => [event.id, event])).values()
+        ) as CalendarEvent[]
+        setEvents(uniqueEvents)
       }
     } catch (error) {
       console.error('Erreur lors du chargement des événements:', error)
@@ -227,31 +231,52 @@ export default function CalendarPage() {
 
   // Calculer la position et la largeur de chaque événement pour l'affichage continu
   const getEventPosition = (event: CalendarEvent) => {
+    // Créer les dates en heure locale pour éviter les problèmes de fuseau horaire
     const start = new Date(event.startDate)
     const end = new Date(event.endDate)
-    start.setHours(0, 0, 0, 0)
-    end.setHours(23, 59, 59, 999)
+    
+    // Normaliser les dates en heure locale (midnight local)
+    const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+    const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate())
 
     const monthStart = new Date(year, month, 1)
     const monthEnd = new Date(year, month + 1, 0)
-    monthStart.setHours(0, 0, 0, 0)
-    monthEnd.setHours(23, 59, 59, 999)
+    monthEnd.setHours(23, 59, 59, 999) // S'assurer que monthEnd inclut le dernier jour
 
     // Si l'événement ne chevauche pas ce mois, retourner null
-    if (end < monthStart || start > monthEnd) {
+    if (endDate < monthStart || startDate > monthEnd) {
       return null
     }
 
     // Calculer le jour de début dans le mois (1-indexed)
-    const eventStartDay = start >= monthStart ? start.getDate() : 1
-    const eventEndDay = end <= monthEnd ? end.getDate() : daysInMonth
+    const eventStartDay = startDate >= monthStart ? startDate.getDate() : 1
+    // Calculer le jour de fin dans le mois (1-indexed)
+    // Si endDate est dans ce mois, utiliser endDate.getDate()
+    // Sinon, utiliser daysInMonth (dernier jour du mois)
+    let eventEndDay: number
+    // Vérifier si endDate est dans ce mois (en comparant année et mois)
+    const endDateYear = endDate.getFullYear()
+    const endDateMonth = endDate.getMonth() // 0-based (0 = janvier, 11 = décembre)
+    if (endDateYear === year && endDateMonth === month) {
+      // L'événement se termine dans ce mois
+      eventEndDay = endDate.getDate()
+    } else if (endDate > monthEnd) {
+      // L'événement se termine après ce mois, utiliser le dernier jour du mois
+      eventEndDay = daysInMonth
+    } else {
+      // L'événement se termine avant ce mois (ne devrait pas arriver à cause du check précédent)
+      eventEndDay = endDate.getDate()
+    }
 
     // Calculer la position dans la grille (0-indexed, en tenant compte du premier jour du mois)
     const startPosition = firstDay + eventStartDay - 1
-    const endPosition = firstDay + eventEndDay
 
     // Calculer la largeur en nombre de colonnes
-    const width = endPosition - startPosition
+    // La largeur doit inclure le jour de début ET le jour de fin
+    // Si l'événement va du jour 5 au jour 19, cela fait 15 jours (5, 6, 7, ..., 19)
+    // Vérifier que le calcul est correct : eventEndDay - eventStartDay + 1
+    const numberOfDays = eventEndDay - eventStartDay + 1 // Nombre de jours inclus
+    const width = numberOfDays
 
     return {
       startPosition,
@@ -361,8 +386,8 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendrier */}
-      <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-        <div className="grid grid-cols-7 gap-px bg-slate-700">
+      <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-visible">
+        <div className="grid grid-cols-7 gap-px bg-slate-700 relative overflow-visible">
           {/* En-têtes des jours */}
           {dayNames.map(day => (
             <div key={day} className="bg-slate-800 p-2 text-center text-sm font-medium text-gray-300">
@@ -370,125 +395,204 @@ export default function CalendarPage() {
             </div>
           ))}
 
-          {/* Jours du mois */}
+          {/* Jours du mois - Cellules vides pour la structure */}
           {days.map((day, index) => {
             if (day === null) {
               return <div key={`empty-${index}`} className="bg-slate-800 min-h-[80px] md:min-h-[100px]" />
             }
 
             const todayClass = isToday(day) ? 'ring-2 ring-blue-500' : ''
-            const eventRows = getEventsByPosition()
-            
-            // Trouver les événements qui commencent sur ce jour
-            const eventsStartingToday = events.filter(event => {
-              const eventPos = getEventPosition(event)
-              return eventPos && day === eventPos.startDay
-            })
-
             return (
               <div
                 key={day}
-                className={`bg-slate-800 min-h-[80px] md:min-h-[100px] p-1 md:p-2 border-b border-r border-slate-700 ${todayClass} relative overflow-visible`}
+                className={`bg-slate-800 min-h-[80px] md:min-h-[100px] p-1 md:p-2 border-b border-r border-slate-700 ${todayClass} relative`}
+                style={{ position: 'relative', overflow: 'visible', zIndex: 1 }}
               >
                 <div className="text-xs md:text-sm font-medium text-white mb-0.5 md:mb-1">{day}</div>
-                <div className="space-y-0.5 md:space-y-1 relative" style={{ minHeight: `${Math.max(1, eventRows.length) * 24}px` }}>
-                  {eventsStartingToday.map(event => {
-                    const eventPos = getEventPosition(event)
-                    if (!eventPos) return null
-                    
-                    // Trouver dans quelle ligne cet événement est placé
-                    let rowIndex = 0
-                    for (let i = 0; i < eventRows.length; i++) {
-                      if (eventRows[i].some(item => item.event.id === event.id)) {
-                        rowIndex = i
-                        break
-                      }
-                    }
-                    
-                    const isMultiDay = eventPos.width > 1
-                    const widthInCols = eventPos.width
-                    const cellWidth = 100 / 7 // Largeur d'une cellule en pourcentage
-                    const gapWidth = 1 // Largeur du gap en pixels (gap-px = 1px)
-                    
-                    return (
-                      <div
-                        key={event.id}
-                        className="absolute"
-                        style={{
-                          left: '0',
-                          width: isMultiDay 
-                            ? `calc(${widthInCols} * ${cellWidth}% + ${(widthInCols - 1) * gapWidth}px)` 
-                            : '100%',
-                          top: `${rowIndex * 24}px`,
-                          height: '20px',
-                          zIndex: 10,
-                        }}
-                        onMouseEnter={() => setHoveredEvent(event.id)}
-                        onMouseLeave={() => setHoveredEvent(null)}
-                        onClick={() => {
-                          if (event.description) {
-                            setHoveredEvent(hoveredEvent === event.id ? null : event.id)
-                          }
-                        }}
-                      >
-                        <div
-                          className={`h-full text-[10px] md:text-xs p-0.5 md:p-1 flex items-center justify-between gap-0.5 md:gap-1 ${
-                            event.eventType === 'absence'
-                              ? 'bg-red-900/50 text-red-200 border border-red-700'
-                              : 'bg-blue-900/50 text-blue-200 border border-blue-700'
-                          }`}
-                          style={{
-                            borderRadius: isMultiDay ? '4px 0 0 4px' : '4px',
-                          }}
-                          title={`${event.eventType === 'absence' ? t('calendar.eventTypeAbsence') : t('calendar.eventTypeOther')}: ${event.user.name || event.user.identifier} - ${formatDate(event.startDate)} ${t('calendar.to')} ${formatDate(event.endDate)}${event.description ? t('calendar.clickToSeeNote') : ''}`}
-                        >
-                          <span className="truncate flex-1 text-[10px] md:text-xs">
-                            {event.eventType === 'absence' ? '🔴' : '🔵'} <span className="hidden sm:inline">{event.user.name || event.user.identifier}</span><span className="sm:hidden">{event.user.name?.split(' ')[0] || event.user.identifier}</span>
-                          </span>
-                          <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
-                            {(session?.user?.id === event.userId || session?.user?.role === 'admin') && (
-                              <>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleEditEvent(event)
-                                  }}
-                                  className="text-blue-400 hover:text-blue-300 flex-shrink-0"
-                                  title={t('calendar.modifyEvent')}
-                                >
-                                  <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleDeleteEvent(event.id)
-                                  }}
-                                  className="text-red-400 hover:text-red-300 flex-shrink-0"
-                                  title={t('calendar.deleteEvent')}
-                                >
-                                  <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                  </svg>
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        {hoveredEvent === event.id && event.description && (
-                          <div className="absolute z-50 top-full left-0 mt-1 w-[calc(100vw-2rem)] max-w-64 p-2 bg-slate-800 border border-slate-600 rounded-lg shadow-lg text-[10px] md:text-xs text-white">
-                            <div className="font-semibold mb-1">{t('calendar.note')}:</div>
-                            <div className="whitespace-pre-wrap">{event.description}</div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
               </div>
             )
           })}
+          
+          {/* Conteneur pour TOUS les événements positionnés par rapport à la grille */}
+          {(() => {
+            const eventRows = getEventsByPosition()
+            // Créer une liste de tous les événements avec leurs positions et rowIndex
+            const allEventsWithPos: Array<{ event: CalendarEvent; position: { startPosition: number; width: number; startDay: number; endDay: number }; rowIndex: number }> = []
+            const seenEventIds = new Set<string>()
+            
+            eventRows.forEach((row, rowIndex) => {
+              row.forEach(item => {
+                if (!seenEventIds.has(item.event.id)) {
+                  seenEventIds.add(item.event.id)
+                  allEventsWithPos.push({ ...item, rowIndex })
+                }
+              })
+            })
+            
+            // Constantes pour le calcul de position
+            // Mesurer précisément les hauteurs réelles en utilisant les valeurs Tailwind exactes
+            // L'en-tête : p-2 (8px * 2 = 16px) + text-sm (line-height ~20px avec font-medium) = ~36px
+            // Ajuster légèrement pour correspondre mieux à la structure réelle
+            const headerHeight = 40
+            const gapWidth = 1 // gap-px = 1px
+            const eventHeight = 20 // Hauteur d'un événement
+            const eventSpacing = 24 // Espacement entre événements (24px)
+            const cellWidthPercent = 100 / 7 // 7 colonnes
+            
+            // Valeurs pour le calcul du top - ajustées pour correspondre exactement à la structure
+            // Les cellules ont min-h-[80px] md:min-h-[100px] avec p-1 md:p-2
+            // En mobile : min-h = 80px, p-1 = 4px (top)
+            const cellHeight = 80 // min-h-[80px] en mobile (hauteur minimale)
+            // Padding top de la cellule : p-1 = 4px (mobile)
+            const cellPaddingTop = 4
+            // Label du jour : text-xs md:text-sm font-medium text-white mb-0.5 md:mb-1
+            // text-xs avec font-medium : line-height ~14px (text-xs), mb-0.5 = 2px → ~16px total
+            // Ajuster pour placer les événements juste sous le chiffre (réduire légèrement)
+            const cellDayLabelHeight = 16
+            
+            return (
+              <div 
+                className="absolute inset-0 pointer-events-none" 
+                style={{ 
+                  zIndex: 5,
+                }}
+              >
+                {allEventsWithPos.map(({ event, position: eventPos, rowIndex }) => {
+                  if (!eventPos) return null
+                  
+                  // Diviser l'événement en segments par ligne de la grille (7 colonnes par ligne)
+                  // startPosition est l'index dans la grille complète (incluant les cellules vides au début)
+                  // Par exemple, si firstDay=3 (le 1er est un jeudi) et eventStartDay=5, alors startPosition=7 (ligne 1, colonne 0)
+                  const segments: Array<{ startCol: number; startRow: number; width: number }> = []
+                  let remainingDays = eventPos.width
+                  
+                  // Calculer la position de départ dans la grille
+                  let currentPosition = eventPos.startPosition
+                  
+                  while (remainingDays > 0) {
+                    // Calculer la ligne et la colonne actuelles
+                    const currentRow = Math.floor(currentPosition / 7)
+                    const currentCol = currentPosition % 7
+                    
+                    // Calculer combien de jours peuvent tenir sur cette ligne
+                    // La ligne a 7 colonnes (0-6), donc on ne peut pas dépasser la colonne 6
+                    const daysInThisRow = Math.min(remainingDays, 7 - currentCol)
+                    
+                    segments.push({
+                      startCol: currentCol,
+                      startRow: currentRow,
+                      width: daysInThisRow,
+                    })
+                    
+                    // Avancer dans la grille
+                    remainingDays -= daysInThisRow
+                    currentPosition += daysInThisRow
+                    
+                    // Si on a encore des jours restants, on passe automatiquement à la ligne suivante
+                    // car currentPosition pointera vers la colonne 0 de la ligne suivante
+                  }
+                  
+                  // Rendre chaque segment
+                  return segments.map((segment, segmentIndex) => {
+                    // Calculer la position left pour ce segment
+                    const leftPercent = segment.startCol * cellWidthPercent
+                    const leftGaps = segment.startCol * gapWidth
+                    const left = `calc(${leftPercent}% + ${leftGaps}px)`
+                    
+                    // Calculer la largeur pour ce segment
+                    const widthPercent = segment.width * cellWidthPercent
+                    const widthGaps = (segment.width - 1) * gapWidth
+                    const width = `calc(${widthPercent}% + ${widthGaps}px)`
+                    
+                    // Calculer la position top pour ce segment
+                    // Le conteneur commence à top: 0 (inset-0), donc on doit inclure headerHeight
+                    // Pour chaque ligne de la grille :
+                    // - Hauteur de l'en-tête : headerHeight
+                    // - Position de la ligne : startRow * cellHeight (depuis le début de la grille, après l'en-tête)
+                    // - Padding de la cellule en haut : cellPaddingTop
+                    // - Hauteur du label du jour : cellDayLabelHeight
+                    // - Espacement entre événements : rowIndex * eventSpacing
+                    // Ajuster légèrement pour être sûr que les événements sont sous les chiffres
+                    const topOffset = headerHeight + segment.startRow * cellHeight + cellPaddingTop + cellDayLabelHeight + rowIndex * eventSpacing
+                    const top = `${topOffset}px`
+                    
+                    return (
+                      <div
+                        key={`grid-event-${event.id}-segment-${segmentIndex}`}
+                        className="absolute pointer-events-auto"
+                        style={{
+                          left,
+                          width,
+                          top,
+                          height: '20px',
+                          zIndex: 10,
+                        }}
+                      onMouseEnter={() => setHoveredEvent(event.id)}
+                      onMouseLeave={() => setHoveredEvent(null)}
+                      onClick={() => {
+                        if (event.description) {
+                          setHoveredEvent(hoveredEvent === event.id ? null : event.id)
+                        }
+                      }}
+                    >
+                      <div
+                        className={`h-full text-[10px] md:text-xs p-0.5 md:p-1 flex items-center justify-between gap-0.5 md:gap-1 ${
+                          event.eventType === 'absence'
+                            ? 'bg-red-900/50 text-red-200 border border-red-700'
+                            : 'bg-blue-900/50 text-blue-200 border border-blue-700'
+                        }`}
+                        style={{
+                          borderRadius: '4px',
+                        }}
+                        title={`${event.eventType === 'absence' ? t('calendar.eventTypeAbsence') : t('calendar.eventTypeOther')}: ${event.user.name || event.user.identifier} - ${formatDate(event.startDate)} ${t('calendar.to')} ${formatDate(event.endDate)}${event.description ? t('calendar.clickToSeeNote') : ''}`}
+                      >
+                        <span className="truncate flex-1 text-[10px] md:text-xs">
+                          {event.eventType === 'absence' ? '🔴' : '🔵'} <span className="hidden sm:inline">{event.user.name || event.user.identifier}</span><span className="sm:hidden">{event.user.name?.split(' ')[0] || event.user.identifier}</span>
+                        </span>
+                        <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
+                          {(session?.user?.id === event.userId || session?.user?.role === 'admin') && (
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEditEvent(event)
+                                }}
+                                className="text-blue-400 hover:text-blue-300 flex-shrink-0"
+                                title={t('calendar.modifyEvent')}
+                              >
+                                <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteEvent(event.id)
+                                }}
+                                className="text-red-400 hover:text-red-300 flex-shrink-0"
+                                title={t('calendar.deleteEvent')}
+                              >
+                                <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {hoveredEvent === event.id && event.description && (
+                        <div className="absolute z-50 top-full left-0 mt-1 w-[calc(100vw-2rem)] max-w-64 p-2 bg-slate-800 border border-slate-600 rounded-lg shadow-lg text-[10px] md:text-xs text-white">
+                          <div className="font-semibold mb-1">{t('calendar.note')}:</div>
+                          <div className="whitespace-pre-wrap">{event.description}</div>
+                        </div>
+                      )}
+                      </div>
+                    )
+                  })
+                })}
+              </div>
+            )
+          })()}
         </div>
       </div>
 

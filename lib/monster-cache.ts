@@ -19,7 +19,13 @@ interface MonsterCache {
 }
 
 let cache: MonsterCache | null = null
-let fileLoadAttempted = false // Track si on a déjà tenté de charger le fichier côté client
+
+/**
+ * Vide le cache en mémoire pour forcer un rechargement
+ */
+export function clearCache(): void {
+  cache = null
+}
 
 async function loadMonstersFromFile(): Promise<Monster[]> {
   try {
@@ -49,15 +55,8 @@ async function loadMonstersFromFile(): Promise<Monster[]> {
       return []
     }
     
-    // Côté client : utiliser fetch uniquement si on n'a pas encore tenté
-    if (fileLoadAttempted) {
-      // On a déjà tenté de charger le fichier, ne plus faire de requête
-      return []
-    }
-    
-    // Marquer qu'on a tenté de charger le fichier
-    fileLoadAttempted = true
-    
+    // Côté client : toujours essayer de charger le fichier (ne plus utiliser fileLoadAttempted)
+    // car plusieurs composants peuvent appeler cette fonction en parallèle
     try {
       const response = await fetch('/data/monsters.json', {
         cache: 'no-store'
@@ -77,13 +76,13 @@ async function loadMonstersFromFile(): Promise<Monster[]> {
         }
       } else if (response.status === 404) {
         // Le fichier n'existe pas encore, c'est normal au premier démarrage
-        // Pas de log nécessaire, le fallback vers l'API se fera automatiquement
+        // On retournera un tableau vide et getMonstersFromCache() essaiera l'API
       } else {
         console.warn(`Erreur lors du chargement de monsters.json: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
-      // Erreur réseau ou autre, on laissera le fallback vers l'API se faire
-      // Ne pas logger pour éviter le spam dans la console
+      // Erreur réseau ou autre, retourner un tableau vide
+      // getMonstersFromCache() essaiera l'API en fallback
     }
   } catch (error) {
     console.error('Erreur lors du chargement du fichier monsters.json:', error)
@@ -169,7 +168,7 @@ function normalizeFileName(name: string): string {
  * Vérifie si une image existe localement
  */
 async function checkLocalImageExists(monsterName: string, imageFilename: string): Promise<string | null> {
-  const normalizedName = normalizeFileName(monsterName)
+  const normalizedName = normalizeFileName(monsterName).toLowerCase()
   const fileExtension = imageFilename.split('.').pop() || 'png'
   const monsterFileName = `${normalizedName}.${fileExtension}`
   const localUrl = `/uploads/monsters/${monsterFileName}`
@@ -219,7 +218,11 @@ function initializeCache(monsters: Monster[]): MonsterCache {
   const images: Record<string, string> = {}
   
   // Initialiser avec Swarfarm par défaut (sera mis à jour lors du preload)
+  // Utiliser une clé composite "nom|id" pour identifier de manière unique chaque variante
   monsters.forEach((monster: Monster) => {
+    const key = `${monster.name}|${monster.id}`
+    images[key] = `https://swarfarm.com/static/herders/images/monsters/${monster.image_filename}`
+    // Garder aussi la clé par nom seul pour compatibilité avec les anciennes données
     images[monster.name] = `https://swarfarm.com/static/herders/images/monsters/${monster.image_filename}`
   })
   
@@ -237,9 +240,27 @@ export async function getMonstersFromCache(): Promise<Monster[]> {
   // Essayer de charger depuis le fichier local d'abord
   let monsters = await loadMonstersFromFile()
   
-  // Si le fichier est vide ou n'existe pas, charger depuis l'API
+  // Si le fichier est vide ou n'existe pas, essayer de charger depuis l'API
+  // Cela permet de fonctionner même si le fichier n'a pas encore été téléchargé
   if (!monsters || monsters.length === 0) {
-    monsters = await loadMonstersFromAPI()
+    // Côté client : utiliser l'API qui peut retourner les données même si le fichier n'existe pas
+    if (typeof window !== 'undefined') {
+      try {
+        const response = await fetch('/api/monsters?refresh=false', {
+          cache: 'no-store'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          monsters = data.monsters || []
+        }
+      } catch (error) {
+        // Ignorer les erreurs silencieusement
+        monsters = []
+      }
+    } else {
+      // Côté serveur : retourner un tableau vide (le fichier doit être téléchargé d'abord)
+      monsters = []
+    }
   }
 
   // Initialiser le cache
@@ -248,9 +269,18 @@ export async function getMonstersFromCache(): Promise<Monster[]> {
   return monsters
 }
 
-export function getMonsterImage(name: string): string | null {
+export function getMonsterImage(nameOrKey: string): string | null {
   if (!cache) return null
-  return cache.images[name] || null
+  // Essayer d'abord avec la clé exacte (peut être "nom|id" ou "nom")
+  if (cache.images[nameOrKey]) {
+    return cache.images[nameOrKey]
+  }
+  // Si c'est une clé composite, essayer de trouver par nom seul (pour compatibilité)
+  if (nameOrKey.includes('|')) {
+    const [name] = nameOrKey.split('|')
+    return cache.images[name] || null
+  }
+  return null
 }
 
 export function getMonsterImageUrl(name: string): string {
@@ -267,10 +297,10 @@ export function getAllMonsterImages(): Record<string, string> {
 
 /**
  * Met à jour le cache en mémoire avec une URL locale pour un monstre
- * @param monsterName Le nom du monstre
+ * @param monsterNameOrKey Le nom du monstre ou la clé composite "nom|id"
  * @param localUrl L'URL locale de l'image
  */
-export async function updateMonsterImageCache(monsterName: string, localUrl: string): Promise<void> {
+export async function updateMonsterImageCache(monsterNameOrKey: string, localUrl: string): Promise<void> {
   // S'assurer que le cache est initialisé
   if (!cache) {
     await getMonstersFromCache()
@@ -278,58 +308,98 @@ export async function updateMonsterImageCache(monsterName: string, localUrl: str
   
   // Mettre à jour le cache avec l'URL locale
   if (cache) {
-    cache.images[monsterName] = localUrl
+    cache.images[monsterNameOrKey] = localUrl
+    // Si c'est une clé composite, mettre à jour aussi avec le nom seul pour compatibilité
+    if (monsterNameOrKey.includes('|')) {
+      const [name] = monsterNameOrKey.split('|')
+      cache.images[name] = localUrl
+    }
   }
 }
 
 // Fonction pour précharger les images des monstres spécifiés
-export async function preloadMonsterImages(monsterNames: string[]): Promise<Record<string, string>> {
+// Accepte soit des noms simples, soit des clés composites "nom|id"
+export async function preloadMonsterImages(monsterNamesOrKeys: string[]): Promise<Record<string, string>> {
   const monsters = await getMonstersFromCache()
   const images: Record<string, string> = {}
   
-  // Vérifier d'abord les images locales en batch (plus efficace)
-  let localImages: Record<string, string> = {}
-  
-  if (typeof window !== 'undefined') {
-    // Côté client : vérifier en batch via l'API
-    localImages = await checkLocalImagesBatch(monsterNames)
-  } else {
-    // Côté serveur : vérifier une par une
-    for (const monsterName of monsterNames) {
-      const monster = monsters.find(m => m.name === monsterName)
-      if (!monster) continue
-      
-      const localUrl = await checkLocalImageExists(monsterName, monster.image_filename)
-      if (localUrl) {
-        localImages[monsterName] = localUrl
+  // Assigner les URLs (locales en priorité, Swarfarm en fallback)
+  for (const monsterNameOrKey of monsterNamesOrKeys) {
+    // Extraire le nom et l'ID si c'est une clé composite
+    let monsterName: string
+    let monsterId: number | undefined
+    if (monsterNameOrKey.includes('|')) {
+      const [name, idStr] = monsterNameOrKey.split('|')
+      monsterName = name
+      monsterId = parseInt(idStr, 10)
+    } else {
+      monsterName = monsterNameOrKey
+    }
+    
+    // Trouver le monstre correspondant (avec l'ID si disponible pour être précis)
+    const monster = monsters.find(m => {
+      if (monsterId !== undefined) {
+        return m.name === monsterName && m.id === monsterId
       }
+      return m.name === monsterName
+    })
+    
+    if (!monster) continue
+    
+    // Construire le nom de fichier local basé sur le nom normalisé et l'extension de l'image_filename
+    const normalizedName = normalizeFileName(monster.name).toLowerCase()
+    const fileExtension = monster.image_filename.split('.').pop() || 'png'
+    const monsterFileName = `${normalizedName}.${fileExtension}`
+    const localPath = `/uploads/monsters/${monsterFileName}`
+    const swarfarmUrl = `https://swarfarm.com/static/herders/images/monsters/${monster.image_filename}`
+    
+    // Priorité aux images locales
+    let imageUrl: string
+    if (typeof window === 'undefined') {
+      // Côté serveur : vérifier si l'image existe localement
+      const localUrl = await checkLocalImageExists(monster.name, monster.image_filename)
+      imageUrl = localUrl || swarfarmUrl
+    } else {
+      // Côté client : vérifier dans le cache si on sait déjà que l'image existe localement
+      // Sinon, utiliser l'image locale en priorité (le navigateur gérera le fallback via onError)
+      // On évite les requêtes HEAD qui génèrent des erreurs 404 dans la console
+      if (cache?.images && cache.images[monsterNameOrKey]?.startsWith('/uploads/')) {
+        // Si on a déjà une URL locale dans le cache, l'utiliser
+        imageUrl = cache.images[monsterNameOrKey]
+      } else {
+        // Sinon, essayer l'image locale (le composant gérera le fallback vers Swarfarm si nécessaire)
+        imageUrl = localPath
+      }
+    }
+    
+    // Utiliser la clé originale (composite ou simple) pour stocker l'image (locale en priorité)
+    images[monsterNameOrKey] = imageUrl
+    
+    // Stocker aussi avec la clé composite si ce n'était pas déjà une clé composite
+    if (!monsterNameOrKey.includes('|')) {
+      const compositeKey = `${monster.name}|${monster.id}`
+      images[compositeKey] = imageUrl
+    }
+    
+    // Stocker aussi l'URL Swarfarm pour le fallback dans les gestionnaires d'erreur
+    // Utiliser une clé spéciale pour le fallback Swarfarm
+    const swarfarmKey = `${monsterNameOrKey}_swarfarm`
+    images[swarfarmKey] = swarfarmUrl
+    // Stocker aussi avec le nom simple pour compatibilité
+    const swarfarmKeySimple = `${monster.name}_swarfarm`
+    images[swarfarmKeySimple] = swarfarmUrl
+    
+    // Télécharger l'image localement en arrière-plan (sans bloquer)
+    if (typeof window !== 'undefined') {
+      fetch('/api/monsters/images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageFilename: monster.image_filename }),
+      }).catch(() => {
+        // Ignorer les erreurs de téléchargement en arrière-plan
+      })
     }
   }
-  
-  // Assigner les URLs (locales en priorité, Swarfarm en fallback)
-  monsterNames.forEach((monsterName) => {
-    const monster = monsters.find(m => m.name === monsterName)
-    if (!monster) return
-    
-    // Utiliser l'image locale si disponible, sinon Swarfarm
-    if (localImages[monsterName]) {
-      images[monsterName] = localImages[monsterName]
-    } else {
-      const swarfarmUrl = `https://swarfarm.com/static/herders/images/monsters/${monster.image_filename}`
-      images[monsterName] = swarfarmUrl
-      
-      // Télécharger l'image localement en arrière-plan (sans bloquer)
-      if (typeof window !== 'undefined') {
-        fetch('/api/monsters/images', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageFilename: monster.image_filename }),
-        }).catch(() => {
-          // Ignorer les erreurs de téléchargement en arrière-plan
-        })
-      }
-    }
-  })
   
   // Mettre à jour le cache avec les URLs (locales en priorité)
   if (cache) {

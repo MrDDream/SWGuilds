@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth-helpers'
 import { saveMonstersToFile, loadMonstersFromFile } from '@/lib/monster-file-cache'
-import { updateMonsterImageCache } from '@/lib/monster-cache'
+import { updateMonsterImageCache, clearCache } from '@/lib/monster-cache'
+import { clearMonstersCache } from '@/lib/monsters-api-cache'
 import { join } from 'path'
 import { existsSync, mkdir, writeFile, readdir } from 'fs'
 import { promisify } from 'util'
@@ -79,7 +80,7 @@ async function downloadMonsterImage(
   uploadsDir: string
 ): Promise<{ downloaded: boolean; alreadyExists: boolean }> {
   try {
-    const normalizedName = normalizeFileName(monsterName)
+    const normalizedName = normalizeFileName(monsterName).toLowerCase()
     const fileExtension = imageFilename.split('.').pop() || 'png'
     const monsterFileName = `${normalizedName}.${fileExtension}`
     const localPath = join(uploadsDir, monsterFileName)
@@ -195,6 +196,8 @@ export async function POST(request: NextRequest) {
     let alreadyExistsCount = 0
     let errorCount = 0
 
+    console.log(`Début du téléchargement des images pour ${simplified.length} monstres...`)
+
     // Télécharger les images en batch (par lots de 10 pour ne pas surcharger)
     // Seulement pour les monstres nouveaux ou mis à jour, ou si l'image n'existe pas
     for (let i = 0; i < simplified.length; i++) {
@@ -206,20 +209,29 @@ export async function POST(request: NextRequest) {
         alreadyExistsCount++
         // Mettre à jour le cache même si l'image existe déjà
         const fileExtension = monster.image_filename.split('.').pop() || 'png'
-        const monsterFileName = `${normalizeFileName(monster.name)}.${fileExtension}`
+        const monsterFileName = `${normalizeFileName(monster.name).toLowerCase()}.${fileExtension}`
         const localUrl = `/uploads/monsters/${monsterFileName}`
         await updateMonsterImageCache(monster.name, localUrl)
       } else {
         // Télécharger l'image seulement si elle n'existe pas
+        console.log(`[${i + 1}/${simplified.length}] Téléchargement de l'image pour ${monster.name}...`)
         const result = await downloadMonsterImage(monster.image_filename, monster.name, uploadsDir)
         
         if (result.downloaded) {
           downloadedCount++
+          console.log(`✓ Image téléchargée avec succès: ${monster.name}`)
         } else if (result.alreadyExists) {
           alreadyExistsCount++
+          console.log(`- Image déjà présente: ${monster.name}`)
         } else {
           errorCount++
+          console.log(`✗ Erreur lors du téléchargement: ${monster.name}`)
         }
+      }
+
+      // Afficher un résumé toutes les 50 images
+      if ((i + 1) % 50 === 0) {
+        console.log(`Progression: ${i + 1}/${simplified.length} monstres traités | Téléchargées: ${downloadedCount} | Déjà présentes: ${alreadyExistsCount} | Erreurs: ${errorCount}`)
       }
 
       // Petite pause toutes les 10 images
@@ -227,6 +239,19 @@ export async function POST(request: NextRequest) {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
     }
+
+    // Afficher le dernier monstre traité
+    if (simplified.length > 0) {
+      const lastMonster = simplified[simplified.length - 1]
+      console.log(`Dernier monstre traité: ${lastMonster.name}`)
+    }
+
+    console.log(`Téléchargement terminé. Total: ${downloadedCount} téléchargées, ${alreadyExistsCount} déjà présentes, ${errorCount} erreurs`)
+
+    // Invalider les caches pour forcer un rechargement après toutes les opérations
+    clearCache()
+    clearMonstersCache()
+    console.log('Cache invalidé, les données seront rechargées au prochain accès')
 
     return NextResponse.json({
       success: true,

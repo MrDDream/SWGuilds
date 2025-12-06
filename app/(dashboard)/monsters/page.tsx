@@ -50,11 +50,6 @@ function getElementIconUrl(element: string): string {
   return elementMap[element] || ''
 }
 
-// Fonction pour obtenir l'URL de l'icône 2A depuis Swarfarm
-function getSecondAwakeningIconUrl(): string {
-  return 'https://swarfarm.com/static/herders/images/awakenings/second_awakening.png'
-}
-
 // Fonction pour normaliser la recherche (traduction anglais -> français)
 function normalizeSearchQuery(query: string): string {
   const translations: Record<string, string> = {
@@ -79,6 +74,54 @@ function normalizeSearchQuery(query: string): string {
 export default function MonstersPage() {
   const { data: session } = useSession()
   const { t } = useI18n()
+  
+  // Supprimer les erreurs 404 pour second_awakening.png de la console
+  useEffect(() => {
+    // Intercepter les erreurs globales pour masquer les erreurs 404 de second_awakening.png
+    const handleError = (e: ErrorEvent) => {
+      const target = e.target as HTMLElement
+      if (target && target.tagName === 'IMG') {
+        const img = target as HTMLImageElement
+        if (img.src && (img.src.includes('second_awakening.png') || img.src.includes('swar-farm.com'))) {
+          e.preventDefault()
+          e.stopPropagation()
+          return false
+        }
+      }
+      return true
+    }
+    
+    // Intercepter les erreurs de la console pour masquer les erreurs 404
+    const originalError = console.error
+    const originalWarn = console.warn
+    
+    console.error = (...args: any[]) => {
+      const message = args.join(' ')
+      if (message.includes('second_awakening.png') || message.includes('swar-farm.com') || message.includes('404')) {
+        // Vérifier si c'est bien l'erreur de second_awakening.png
+        if (message.includes('second_awakening') || message.includes('swar-farm')) {
+          return // Ignorer cette erreur
+        }
+      }
+      originalError.apply(console, args)
+    }
+    
+    console.warn = (...args: any[]) => {
+      const message = args.join(' ')
+      if (message.includes('second_awakening.png') || message.includes('swar-farm.com')) {
+        return // Ignorer cet avertissement
+      }
+      originalWarn.apply(console, args)
+    }
+    
+    window.addEventListener('error', handleError, true)
+    
+    return () => {
+      window.removeEventListener('error', handleError, true)
+      console.error = originalError
+      console.warn = originalWarn
+    }
+  }, [])
   const [users, setUsers] = useState<User[]>([])
   const [selectedUserId, setSelectedUserId] = useState<string>('')
   const [monsters, setMonsters] = useState<Monster[]>([])
@@ -948,20 +991,7 @@ export default function MonstersPage() {
                           {/* Icône 2A si le monstre a un double éveil */}
                           {isSecondAwakened && (
                             <div className="absolute top-1 left-1 w-6 h-6 bg-yellow-600 rounded-full flex items-center justify-center z-10" title={t('monsters.secondAwakening')}>
-                              <img
-                                src={getSecondAwakeningIconUrl()}
-                                alt="2A"
-                                className="w-4 h-4"
-                                loading="lazy"
-                                onError={(e) => {
-                                  // Si l'icône ne charge pas, afficher un badge texte
-                                  e.currentTarget.style.display = 'none'
-                                  const parent = e.currentTarget.parentElement
-                                  if (parent) {
-                                    parent.innerHTML = '<span class="text-xs text-white font-bold">2A</span>'
-                                  }
-                                }}
-                              />
+                              <span className="text-xs text-white font-bold">2A</span>
                             </div>
                           )}
                           

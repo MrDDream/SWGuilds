@@ -19,8 +19,8 @@ export function getMonsterImageUrl(imageFilename: string, monsterName?: string):
     return `https://swarfarm.com/static/herders/images/monsters/${imageFilename}`
   }
 
-  // Normaliser le nom du monstre
-  const normalizedName = normalizeFileName(monsterName)
+  // Normaliser le nom du monstre (toujours en minuscules pour éviter les problèmes de casse)
+  const normalizedName = normalizeFileName(monsterName).toLowerCase()
   const fileExtension = imageFilename.split('.').pop() || 'png'
   const monsterFileName = `${normalizedName}.${fileExtension}`
 
@@ -45,7 +45,7 @@ export function getLocalMonsterImageUrlByName(monsterName: string): string | nul
     const { existsSync } = require('fs')
     const { join } = require('path')
     
-    const normalizedName = normalizeFileName(monsterName)
+    const normalizedName = normalizeFileName(monsterName).toLowerCase()
     const uploadsDir = join(process.cwd(), 'public', 'uploads', 'monsters')
     
     // Chercher le fichier avec différentes extensions possibles
@@ -73,7 +73,7 @@ export function getLocalMonsterImagePath(monsterName: string, extension: string 
   }
   
   const { join } = require('path')
-  const normalizedName = normalizeFileName(monsterName)
+  const normalizedName = normalizeFileName(monsterName).toLowerCase()
   return join(process.cwd(), 'public', 'uploads', 'monsters', `${normalizedName}.${extension}`)
 }
 
@@ -81,6 +81,6 @@ export function getLocalMonsterImagePath(monsterName: string, extension: string 
  * Obtient l'URL publique pour une image de monstre locale par nom
  */
 export function getLocalMonsterImageUrl(monsterName: string, extension: string = 'png'): string {
-  const normalizedName = normalizeFileName(monsterName)
+  const normalizedName = normalizeFileName(monsterName).toLowerCase()
   return `/uploads/monsters/${normalizedName}.${extension}`
 }

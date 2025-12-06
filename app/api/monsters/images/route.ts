@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       const monster = monsters.find(m => m.name === monsterName)
       if (!monster) return
       
-      const normalizedName = normalizeFileName(monsterName)
+      const normalizedName = normalizeFileName(monsterName).toLowerCase()
       const fileExtension = monster.image_filename.split('.').pop() || 'png'
       const monsterFileName = `${normalizedName}.${fileExtension}`
       const localPath = join(uploadsDir, monsterFileName)
@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Normaliser le nom du monstre pour le nom de fichier
-    const normalizedMonsterName = normalizeFileName(monster.name)
+    // Normaliser le nom du monstre pour le nom de fichier (toujours en minuscules pour éviter les problèmes de casse)
+    const normalizedMonsterName = normalizeFileName(monster.name).toLowerCase()
     const fileExtension = imageFilename.split('.').pop() || 'png'
     const monsterFileName = `${normalizedMonsterName}.${fileExtension}`
 

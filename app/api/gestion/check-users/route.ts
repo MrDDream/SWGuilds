@@ -29,10 +29,22 @@ function findMonsterByUnitMasterId(unitMasterId: number, monsters: any[]): any |
 }
 
 /**
+ * Extrait le nom d'un monstre depuis une clé composite "Nom|ID" ou un simple nom
+ */
+function extractMonsterName(monsterKey: string): string {
+  if (monsterKey.includes('|')) {
+    return monsterKey.split('|')[0]
+  }
+  return monsterKey
+}
+
+/**
  * Vérifie si un utilisateur possède un monstre spécifique
  */
 async function userHasMonster(userId: string, monsterName: string, allMonsters: any[]): Promise<boolean> {
-  const normalizedMonsterName = monsterName.toLowerCase().trim()
+  // Extraire le nom du monstre si c'est une clé composite "Nom|ID"
+  const monsterDisplayName = extractMonsterName(monsterName)
+  const normalizedMonsterName = monsterDisplayName.toLowerCase().trim()
   
   // 1. Vérifier les monstres manuels
   const manualMonsters = await prisma.userMonster.findMany({

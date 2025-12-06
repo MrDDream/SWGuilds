@@ -1786,29 +1786,29 @@ export function AdminPanel({ initialUsers, initialLogs }: AdminPanelProps) {
                               <div className="fixed sm:absolute left-4 sm:left-auto right-4 sm:right-0 top-1/2 sm:top-auto sm:top-full -translate-y-1/2 sm:translate-y-0 sm:mt-1 w-[calc(100vw-2rem)] sm:w-48 max-w-sm sm:max-w-none bg-slate-700 rounded-lg shadow-xl z-50 border border-slate-600 overflow-hidden">
                               <div className="py-1">
                                 {!isEnvAdmin(user) && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setShowRenameModal({ userId: user.id, identifier: user.identifier, currentName: user.name })
-                                      setNewName(user.name || '')
-                                      setOpenMenuId(null)
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-600 transition-colors"
-                                  >
-                                    {t('admin.rename')}
-                                  </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowRenameModal({ userId: user.id, identifier: user.identifier, currentName: user.name })
+                                    setNewName(user.name || '')
+                                    setOpenMenuId(null)
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-600 transition-colors"
+                                >
+                                  {t('admin.rename')}
+                                </button>
                                 )}
                                 {!isEnvAdmin(user) && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setShowPasswordModal({ userId: user.id, identifier: user.identifier })
-                                      setOpenMenuId(null)
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-600 transition-colors"
-                                  >
-                                    {t('admin.changePassword')}
-                                  </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowPasswordModal({ userId: user.id, identifier: user.identifier })
+                                    setOpenMenuId(null)
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-600 transition-colors"
+                                >
+                                  {t('admin.changePassword')}
+                                </button>
                                 )}
                                 {user.role !== 'admin' && (
                                   <button
@@ -1823,16 +1823,16 @@ export function AdminPanel({ initialUsers, initialLogs }: AdminPanelProps) {
                                   </button>
                                 )}
                                 {!isEnvAdmin(user) && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      handleLockUser(user.id, user.isApproved)
-                                      setOpenMenuId(null)
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-600 transition-colors"
-                                  >
-                                    {user.isApproved ? t('admin.lockAccount') : t('admin.unlockAccount')}
-                                  </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleLockUser(user.id, user.isApproved)
+                                    setOpenMenuId(null)
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-600 transition-colors"
+                                >
+                                  {user.isApproved ? t('admin.lockAccount') : t('admin.unlockAccount')}
+                                </button>
                                 )}
                                 {!isEnvAdmin(user) && (
                                   <button

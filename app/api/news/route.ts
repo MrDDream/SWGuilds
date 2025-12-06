@@ -39,7 +39,11 @@ export async function GET() {
     )
     
     return NextResponse.json(postsWithUsers)
-  } catch (error) {
+  } catch (error: any) {
+    // Ne pas logger les erreurs NEXT_REDIRECT (redirections normales de Next.js)
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error // Re-lancer la redirection pour qu'elle soit gérée par Next.js
+    }
     console.error('Erreur lors de la récupération des posts News:', error)
     return NextResponse.json(
       { error: 'Erreur serveur' },
@@ -102,7 +106,11 @@ export async function POST(request: NextRequest) {
     })
     
     return NextResponse.json(post, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
+    // Ne pas logger les erreurs NEXT_REDIRECT (redirections normales de Next.js)
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error // Re-lancer la redirection pour qu'elle soit gérée par Next.js
+    }
     console.error('Erreur lors de la création du post News:', error)
     return NextResponse.json(
       { error: 'Erreur serveur' },
