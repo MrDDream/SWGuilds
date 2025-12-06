@@ -1,9 +1,7 @@
 <div align="center">
   <img src="public/uploads/logo.png" alt="SWGuilds Logo" width="200"/>
   
-  # SWGuilds
-  
-  **Application web complète pour la gestion de guildes Summoners War**
+  **Application web complète pour la gestion de guilde Summoners War**
   
   [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
   [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
@@ -12,22 +10,6 @@
 </div>
 
 ---
-
-## 📋 Table des matières
-
-- [À propos](#-à-propos)
-- [Fonctionnalités](#-fonctionnalités)
-- [Installation rapide avec Docker](#-installation-rapide-avec-docker)
-- [Installation avec Docker Compose (build local)](#-installation-avec-docker-compose-build-local)
-- [Configuration](#-configuration)
-- [Utilisation](#-utilisation)
-- [Technologies utilisées](#-technologies-utilisées)
-- [Structure du projet](#-structure-du-projet)
-- [Maintenance et dépannage](#-maintenance-et-dépannage)
-- [Support](#-support)
-
----
-
 ## 🎯 À propos
 
 **SWGuilds** est une application web full-stack conçue pour aider les guildes de **Summoners War: Sky Arena** à gérer efficacement leurs défenses, contres, calendrier, carte de guilde et bien plus encore.
@@ -36,15 +18,26 @@ L'application offre une interface moderne et intuitive, disponible en français 
 
 ---
 
+## 📋 Table des matières
+
+- [Fonctionnalités](#-fonctionnalités)
+- [Captures d'écran](#-captures-décran)
+- [Installation rapide avec Docker](#-installation-rapide-avec-docker)
+- [Configuration](#-configuration)
+- [Utilisation](#-utilisation)
+- [Technologies utilisées](#-technologies-utilisées)
+- [Maintenance et dépannage](#-maintenance-et-dépannage)
+- [Support](#-support)
+
+---
+
 ## ✨ Fonctionnalités
 
 ### 🛡️ Gestion des défenses
 
 - **CRUD complet** : Créez, modifiez, supprimez et consultez toutes vos défenses
-- **Épinglage** : Épinglez vos défenses favorites sur le tableau de bord pour un accès rapide
 - **Système de tags** : Organisez vos défenses avec des étiquettes personnalisées
-- **Notes détaillées** : Ajoutez des notes sur les forces, faiblesses et séquences d'attaque
-- **Visibilité** : Définissez si vos défenses sont publiques ou privées
+- **Notes détaillées** : Ajoutez des notes sur les forces, faiblesses
 - **Votes** : Système de likes/dislikes pour évaluer les défenses
 
 **Accès** : Menu "Défenses" → Créer une nouvelle défense
@@ -63,7 +56,6 @@ L'application offre une interface moderne et intuitive, disponible en français 
 - **Gestion des absences** : Enregistrez les absences des membres de la guilde
 - **Événements personnalisés** : Créez des événements personnalisés avec notes
 - **Vue mensuelle** : Affichage mensuel avec support des événements multi-jours
-- **Segments automatiques** : Les événements s'étalant sur plusieurs semaines sont automatiquement segmentés
 - **Notifications Discord** : Option pour envoyer des notifications Discord lors de la création d'absences
 - **Gestion multi-utilisateurs** : Les administrateurs peuvent créer des événements pour d'autres membres
 
@@ -74,11 +66,22 @@ L'application offre une interface moderne et intuitive, disponible en français 
 - **Plan de guilde** : Visualisez et gérez votre plan de guilde avec une carte interactive
 - **Tours draggables** : Déplacez et redimensionnez les tours directement sur la carte
 - **Assignation de défenses** : Assignez des défenses spécifiques à chaque tour
-- **Gestion des positions** : Sauvegardez automatiquement les positions des tours
 - **Modes de carte** : Support pour carte normale et carte de tournoi
 - **Assignation d'utilisateurs** : Assignez des membres à des tours spécifiques
 
 **Accès** : Menu "Carte"
+
+### 👥 Gestion des affectations
+
+- **Affectation de défenses** : Assignez des défenses spécifiques à plusieurs membres de la guilde
+- **Vérification automatique** : Le système vérifie automatiquement quels membres possèdent les monstres nécessaires pour chaque défense
+- **Affectations multiples** : Assignez une même défense à plusieurs membres simultanément
+- **Gestion des affectations** : Consultez toutes les affectations existantes ou filtrez pour voir uniquement vos affectations
+- **Modification** : Modifiez ou supprimez les affectations existantes
+- **Vue d'ensemble** : Visualisez toutes les défenses assignées avec les monstres et les membres concernés
+- **Permissions** : Contrôle d'accès via la permission `canEditAssignments`
+
+**Accès** : Menu "Gestion" (permission `canEditAssignments` requise pour créer/modifier)
 
 ### 👹 Base de données des monstres
 
@@ -139,6 +142,58 @@ L'application offre une interface moderne et intuitive, disponible en français 
 
 ---
 
+## 📸 Captures d'écran
+
+### 🔐 Authentification
+
+![Page de connexion](screenshots/login.png)
+
+### 📰 Actualités
+
+![Page des actualités](screenshots/news.png)
+
+### 🛡️ Gestion des défenses
+
+![Liste des défenses](screenshots/defenses.png)
+
+![Création d'une défense](screenshots/defense-create.png)
+
+![Détail d'une défense](screenshots/defense-detail.png)
+
+### ⚔️ Système de contres
+
+![Contres d'une défense](screenshots/counters.png)
+
+### 🗺️ Carte interactive
+
+![Carte de guilde](screenshots/map.png)
+
+### 👥 Gestion des affectations
+
+![Gestion des affectations](screenshots/gestion.png)
+
+### 👹 Base de données des monstres
+
+![Recherche de monstres](screenshots/monsters.png)
+
+### 📅 Calendrier
+
+![Vue mensuelle du calendrier](screenshots/calendar.png)
+
+### 🔧 Administration
+
+![Panel d'administration](screenshots/admin.png)
+
+![Gestion des utilisateurs](screenshots/admin-users.png)
+
+![Paramètres d'administration](screenshots/admin-settings.png)
+
+### 👤 Profil utilisateur
+
+![Profil utilisateur](screenshots/profile.png)
+
+---
+
 ## 🚀 Installation rapide avec Docker
 
 La méthode la plus simple pour déployer SWGuilds est d'utiliser l'image Docker pré-construite disponible sur GitHub Container Registry.
@@ -150,10 +205,10 @@ La méthode la plus simple pour déployer SWGuilds est d'utiliser l'image Docker
 
 ### Étapes d'installation
 
-1. **Téléchargez le fichier `docker-compose-prod.yml`** :
+1. **Téléchargez le fichier `docker-compose.yml`** :
 
 ```bash
-curl -O https://raw.githubusercontent.com/votre-repo/SWGuilds/main/docker-compose-prod.yml
+curl -O https://raw.githubusercontent.com/votre-repo/SWGuilds/main/docker-compose.yml
 ```
 
 Ou clonez le repository :
@@ -181,6 +236,8 @@ docker-compose -f docker-compose-prod.yml up -d
 
 Ouvrez votre navigateur à l'adresse : `http://votre-ip:3020` (ou le port configuré dans `EXTERNAL_PORT`)
 
+Pour utiliser l'applicationn après la mise en ligne aller dans **Administration** -> **Paramètres** -> **Mettre à jour depuis SwarFarm** (cela téléchargera les informations et les îcones en local, ce bouton doit être utilisé par exemple lors d'ajout de nouveaux monstres).
+
 ### Volumes Docker
 
 L'application utilise des volumes Docker nommés pour persister les données :
@@ -189,47 +246,6 @@ L'application utilise des volumes Docker nommés pour persister les données :
 - `data_public` : Fichiers uploadés (logos, cartes, avatars, etc.)
 
 Ces volumes sont automatiquement créés lors du premier démarrage.
-
----
-
-## 🛠️ Installation avec Docker Compose (build local)
-
-Si vous préférez construire l'image localement ou développer l'application :
-
-### Prérequis
-
-- Docker et Docker Compose installés
-- Node.js 20+ (pour développement local)
-
-### Étapes d'installation
-
-1. **Clonez le repository** :
-
-```bash
-git clone https://github.com/votre-repo/SWGuilds.git
-cd SWGuilds
-```
-
-2. **Créez votre fichier `.env`** :
-
-```bash
-cp .env.example .env
-```
-
-3. **Configurez les variables d'environnement**
-
-4. **Construisez et lancez avec Docker Compose** :
-
-```bash
-docker-compose up -d --build
-```
-
-### Volumes locaux
-
-Avec `docker-compose.yml`, les données sont stockées localement :
-
-- `./prisma` : Base de données SQLite
-- `./public` : Fichiers uploadés
 
 ---
 
@@ -242,32 +258,21 @@ Créez un fichier `.env` à la racine du projet avec les variables suivantes :
 #### Variables requises
 
 ```env
-# Locale par défaut (fr ou en)
+# Locale
 LOCALE=fr
-
-# Base de données (ne pas modifier pour Docker)
-DATABASE_URL="file:./prisma/dev.db"
-
-# URL de l'application (remplacer par votre IP/domaine)
-NEXTAUTH_URL="http://localhost:3020"
-
-# Secret pour NextAuth (générer une clé sécurisée)
-NEXTAUTH_SECRET="votre-secret-tres-securise-ici"
-```
-
-#### Variables optionnelles
-
-```env
-# Port externe (par défaut 3020)
-EXTERNAL_PORT=3020
-
-# Compte administrateur initial (protégé)
-ADMIN_ID="admin"
-ADMIN_PASSWORD="mot-de-passe-securise"
-ADMIN_NAME="Administrateur"
-
-# Timezone (par défaut Europe/Paris)
+# Timezone
 TIMEZONE=Europe/Paris
+# Admin (optionnel - pour créer automatiquement un compte admin)
+ADMIN_ID=admin
+ADMIN_PASSWORD=change-me
+ADMIN_NAME=Admin
+# External PORT
+EXTERNAL_PORT=3020
+# Database
+DATABASE_URL="file:./prisma/dev.db"
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="change-this-secret-in-production"
 ```
 
 ### Génération de NEXTAUTH_SECRET
@@ -276,12 +281,6 @@ Pour générer un secret sécurisé :
 
 ```bash
 openssl rand -base64 32
-```
-
-Ou en ligne :
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
 ### Configuration du compte administrateur
@@ -385,65 +384,6 @@ Les événements multi-jours s'affichent automatiquement sur plusieurs lignes.
 - `react-resizable` : Redimensionnement des tours
 - `react-markdown` : Rendu Markdown pour les notes
 - `bcryptjs` : Hashage des mots de passe
-
----
-
-## 📁 Structure du projet
-
-```
-SWGuilds/
-├── app/                          # Next.js App Router
-│   ├── (auth)/                  # Routes d'authentification
-│   │   ├── login/
-│   │   └── register/
-│   ├── (dashboard)/             # Routes protégées
-│   │   ├── admin/               # Panel d'administration
-│   │   ├── calendar/            # Calendrier
-│   │   ├── defenses/            # Gestion des défenses
-│   │   ├── gestion/             # Gestion des assignations
-│   │   ├── map/                 # Carte interactive
-│   │   ├── monsters/            # Base de données monstres
-│   │   ├── news/                # Actualités
-│   │   └── profile/             # Profil utilisateur
-│   ├── api/                     # API Routes
-│   │   ├── admin/               # Endpoints admin
-│   │   ├── calendar/            # Endpoints calendrier
-│   │   ├── defenses/            # Endpoints défenses
-│   │   └── ...
-│   └── layout.tsx               # Layout principal
-├── components/                   # Composants React
-│   ├── admin/                   # Composants admin
-│   ├── defenses/                # Composants défenses
-│   ├── map/                     # Composants carte
-│   ├── ui/                      # Composants UI réutilisables
-│   └── layout/                  # Composants de layout
-├── lib/                         # Utilitaires
-│   ├── prisma.ts                # Client Prisma
-│   ├── auth.ts                  # Configuration NextAuth
-│   ├── auth-helpers.ts          # Helpers authentification
-│   ├── i18n.ts                  # Système de traduction
-│   └── monster-cache.ts         # Cache des monstres
-├── locales/                     # Fichiers de traduction
-│   ├── fr.json                  # Traductions françaises
-│   └── en.json                  # Traductions anglaises
-├── prisma/                      # Schéma Prisma
-│   ├── schema.prisma            # Schéma de base de données
-│   └── migrations/              # Migrations
-├── public/                      # Fichiers statiques
-│   └── uploads/                 # Uploads utilisateurs
-│       ├── logo.png             # Logo de l'application
-│       ├── map.png              # Carte normale
-│       ├── map_tournament.png   # Carte tournoi
-│       └── ...
-├── scripts/                     # Scripts utilitaires
-│   ├── create-admin.ts          # Création compte admin
-│   ├── download-all-monsters-and-images.ts
-│   └── reminder-cron.js        # Cron rappels
-├── docker-compose.yml           # Docker Compose (build local)
-├── docker-compose-prod.yml      # Docker Compose (image pré-construite)
-├── Dockerfile                   # Image Docker
-└── package.json                 # Dépendances npm
-```
 
 ---
 
