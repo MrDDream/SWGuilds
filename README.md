@@ -152,7 +152,7 @@ The application offers a modern and intuitive interface, available in French and
 | 🔐 **Authentication** - Login page | ![Login page](screenshots/login.png) |
 | 📰 **News** - News page | ![News page](screenshots/news.png) |
 | 🛡️ **Defenses** - Defense list | ![Defense list](screenshots/defenses.png) |
-| 🔐 Administration** - Branding| ![Create a defense](screenshots/defense-create.png) |
+| 🔐 **Administration** - Branding| ![Create a defense](screenshots/defense-create.png) |
 | 🗺️ **Map** - Interactive guild map  - List towers | ![Defense details](screenshots/defense-detail.png) |
 | ⚔️ **Management** - Assignment management | ![Defense counters](screenshots/counters.png) |
 | 🗺️ **Map** - Interactive guild map | ![Guild map](screenshots/map.png) |
