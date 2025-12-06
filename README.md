@@ -180,13 +180,13 @@ The simplest way to deploy SWGuilds is to use the pre-built Docker image availab
 1. **Download the `docker-compose.yml` file** :
 
 ```bash
-curl -O https://raw.githubusercontent.com/votre-repo/SWGuilds/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/mrddream/SWGuilds/main/docker-compose.yml
 ```
 
 Or clone the repository :
 
 ```bash
-git clone https://github.com/votre-repo/SWGuilds.git
+git clone https://github.com/mrddream/SWGuilds.git
 cd SWGuilds
 ```
 
