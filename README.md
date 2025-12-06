@@ -144,53 +144,22 @@ L'application offre une interface moderne et intuitive, disponible en français 
 
 ## 📸 Captures d'écran
 
-### 🔐 Authentification
-
-![Page de connexion](screenshots/login.png)
-
-### 📰 Actualités
-
-![Page des actualités](screenshots/news.png)
-
-### 🛡️ Gestion des défenses
-
-![Liste des défenses](screenshots/defenses.png)
-
-![Création d'une défense](screenshots/defense-create.png)
-
-![Détail d'une défense](screenshots/defense-detail.png)
-
-### ⚔️ Système de contres
-
-![Contres d'une défense](screenshots/counters.png)
-
-### 🗺️ Carte interactive
-
-![Carte de guilde](screenshots/map.png)
-
-### 👥 Gestion des affectations
-
-![Gestion des affectations](screenshots/gestion.png)
-
-### 👹 Base de données des monstres
-
-![Recherche de monstres](screenshots/monsters.png)
-
-### 📅 Calendrier
-
-![Vue mensuelle du calendrier](screenshots/calendar.png)
-
-### 🔧 Administration
-
-![Panel d'administration](screenshots/admin.png)
-
-![Gestion des utilisateurs](screenshots/admin-users.png)
-
-![Paramètres d'administration](screenshots/admin-settings.png)
-
-### 👤 Profil utilisateur
-
-![Profil utilisateur](screenshots/profile.png)
+| Fonctionnalité | Capture d'écran |
+|----------------|-----------------|
+| 🔐 **Authentification** - Page de connexion | ![Page de connexion](screenshots/login.png) |
+| 📰 **Actualités** - Page des actualités | ![Page des actualités](screenshots/news.png) |
+| 🛡️ **Défenses** - Liste des défenses | ![Liste des défenses](screenshots/defenses.png) |
+| 🛡️ **Défenses** - Création d'une défense | ![Création d'une défense](screenshots/defense-create.png) |
+| 🛡️ **Défenses** - Détail d'une défense | ![Détail d'une défense](screenshots/defense-detail.png) |
+| ⚔️ **Contres** - Contres d'une défense | ![Contres d'une défense](screenshots/counters.png) |
+| 🗺️ **Carte** - Carte de guilde interactive | ![Carte de guilde](screenshots/map.png) |
+| 👥 **Gestion** - Gestion des affectations | ![Gestion des affectations](screenshots/gestion.png) |
+| 👹 **Monstres** - Base de données des monstres | ![Recherche de monstres](screenshots/monsters.png) |
+| 📅 **Calendrier** - Vue mensuelle | ![Vue mensuelle du calendrier](screenshots/calendar.png) |
+| 🔧 **Administration** - Panel d'administration | ![Panel d'administration](screenshots/admin.png) |
+| 🔧 **Administration** - Gestion des utilisateurs | ![Gestion des utilisateurs](screenshots/admin-users.png) |
+| 🔧 **Administration** - Paramètres | ![Paramètres d'administration](screenshots/admin-settings.png) |
+| 👤 **Profil** - Profil utilisateur | ![Profil utilisateur](screenshots/profile.png) |
 
 ---
 
