@@ -179,13 +179,13 @@ La méthode la plus simple pour déployer SWGuilds est d'utiliser l'image Docker
 1. **Téléchargez le fichier `docker-compose.yml`** :
 
 ```bash
-curl -O https://raw.githubusercontent.com/votre-repo/SWGuilds/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/mrddream/SWGuilds/main/docker-compose.yml
 ```
 
 Ou clonez le repository :
 
 ```bash
-git clone https://github.com/votre-repo/SWGuilds.git
+git clone https://github.com/mrddream/SWGuilds.git
 cd SWGuilds
 ```
 
