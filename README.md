@@ -1,8 +1,6 @@
 <div align="center">
   <img src="public/uploads/logo.png" alt="SWGuilds Logo" width="200"/>
   
-  # SWGuilds
-  
   **Application web complète pour la gestion de guildes Summoners War**
   
   [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
