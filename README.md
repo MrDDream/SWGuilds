@@ -152,17 +152,17 @@ The application offers a modern and intuitive interface, available in French and
 | 🔐 **Authentication** - Login page | ![Login page](screenshots/login.png) |
 | 📰 **News** - News page | ![News page](screenshots/news.png) |
 | 🛡️ **Defenses** - Defense list | ![Defense list](screenshots/defenses.png) |
-| 🛡️ **Defenses** - Create a defense | ![Create a defense](screenshots/defense-create.png) |
-| 🛡️ **Defenses** - Defense details | ![Defense details](screenshots/defense-detail.png) |
-| ⚔️ **Counters** - Defense counters | ![Defense counters](screenshots/counters.png) |
+| 🔐 Administration** - Branding| ![Create a defense](screenshots/defense-create.png) |
+| 🗺️ **Map** - Interactive guild map  - List towers | ![Defense details](screenshots/defense-detail.png) |
+| ⚔️ **Management** - Assignment management | ![Defense counters](screenshots/counters.png) |
 | 🗺️ **Map** - Interactive guild map | ![Guild map](screenshots/map.png) |
-| 👥 **Management** - Assignment management | ![Assignment management](screenshots/gestion.png) |
-| 👹 **Monsters** - Monster database | ![Monster search](screenshots/monsters.png) |
-| 📅 **Calendar** - Monthly view | ![Monthly calendar view](screenshots/calendar.png) |
-| 🔧 **Administration** - Admin panel | ![Admin panel](screenshots/admin.png) |
-| 🔧 **Administration** - User management | ![User management](screenshots/admin-users.png) |
-| 🔧 **Administration** - Settings | ![Admin settings](screenshots/admin-settings.png) |
-| 👤 **Profile** - User profile | ![User profile](screenshots/profile.png) |
+| 👹 **Monsters** - Monster database | ![Assignment management](screenshots/gestion.png) |
+| 📅 **Calendar** - Monthly view | ![Monster search](screenshots/monsters.png) |
+| 👤 **Profile** - User profile | ![Monthly calendar view](screenshots/calendar.png) |
+| 🔧 **Administration** - User management | ![Admin panel](screenshots/admin.png) |
+| 🔧 **Administration** - Logs | ![User management](screenshots/admin-users.png) |
+| 🔧 **Administration** - Tags | ![Admin settings](screenshots/admin-settings.png) |
+| 🔧 **Administration** - Reminder | ![User profile](screenshots/profile.png) |
 
 ---
 
