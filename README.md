@@ -10,10 +10,16 @@
 </div>
 
 ---
+## 🎯 À propos
+
+**SWGuilds** est une application web full-stack conçue pour aider les guildes de **Summoners War: Sky Arena** à gérer efficacement leurs défenses, contres, calendrier, carte de guilde et bien plus encore.
+
+L'application offre une interface moderne et intuitive, disponible en français et en anglais, avec un système de permissions granulaires pour une gestion optimale de votre guilde.
+
+---
 
 ## 📋 Table des matières
 
-- [À propos](#-à-propos)
 - [Fonctionnalités](#-fonctionnalités)
 - [Installation rapide avec Docker](#-installation-rapide-avec-docker)
 - [Configuration](#-configuration)
@@ -21,14 +27,6 @@
 - [Technologies utilisées](#-technologies-utilisées)
 - [Maintenance et dépannage](#-maintenance-et-dépannage)
 - [Support](#-support)
-
----
-
-## 🎯 À propos
-
-**SWGuilds** est une application web full-stack conçue pour aider les guildes de **Summoners War: Sky Arena** à gérer efficacement leurs défenses, contres, calendrier, carte de guilde et bien plus encore.
-
-L'application offre une interface moderne et intuitive, disponible en français et en anglais, avec un système de permissions granulaires pour une gestion optimale de votre guilde.
 
 ---
 
