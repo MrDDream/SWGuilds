@@ -10,6 +10,7 @@
 </div>
 
 This documentation is available in [French](README.fr.md) and in [English](README.md)
+
 ---
 ## 🎯 À propos
 
