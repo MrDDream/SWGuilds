@@ -149,13 +149,13 @@ L'application offre une interface moderne et intuitive, disponible en français 
 | 🔐 **Authentification** - Page de connexion | ![Page de connexion](screenshots/login.png) |
 | 📰 **Actualités** - Page des actualités | ![Page des actualités](screenshots/news.png) |
 | 🛡️ **Défenses** - Liste des défenses | ![Liste des défenses](screenshots/defenses.png) |
-| 🛡️ **Défenses** - Création d'une défense | ![Création d'une défense](screenshots/defense-create.png) |
-| 🛡️ **Défenses** - Détail d'une défense | ![Détail d'une défense](screenshots/defense-detail.png) |
-| ⚔️ **Contres** - Contres d'une défense | ![Contres d'une défense](screenshots/counters.png) |
+| 🔐 **Administration** - Personalisation | ![Création d'une défense](screenshots/defense-create.png) |
+| 🛡️ **Map** - Liste des tours | ![Détail d'une défense](screenshots/defense-detail.png) |
+| 👥 **Gestion** - Gestion des affectations | ![Contres d'une défense](screenshots/counters.png) |
 | 🗺️ **Carte** - Carte de guilde interactive | ![Carte de guilde](screenshots/map.png) |
-| 👥 **Gestion** - Gestion des affectations | ![Gestion des affectations](screenshots/gestion.png) |
-| 👹 **Monstres** - Base de données des monstres | ![Recherche de monstres](screenshots/monsters.png) |
-| 📅 **Calendrier** - Vue mensuelle | ![Vue mensuelle du calendrier](screenshots/calendar.png) |
+| 👹 **Monstres** - Base de données des monstres | ![Gestion des affectations](screenshots/gestion.png) |
+|  📅 **Calendrier** - Vue mensuelle | ![Recherche de monstres](screenshots/monsters.png) |
+| 🔐 **Profil** - Profil utilisateur | ![Vue mensuelle du calendrier](screenshots/calendar.png) |
 | 🔧 **Administration** - Panel d'administration | ![Panel d'administration](screenshots/admin.png) |
 | 🔧 **Administration** - Gestion des utilisateurs | ![Gestion des utilisateurs](screenshots/admin-users.png) |
 | 🔧 **Administration** - Paramètres | ![Paramètres d'administration](screenshots/admin-settings.png) |
