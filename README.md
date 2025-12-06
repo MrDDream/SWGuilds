@@ -39,10 +39,8 @@ L'application offre une interface moderne et intuitive, disponible en français 
 ### 🛡️ Gestion des défenses
 
 - **CRUD complet** : Créez, modifiez, supprimez et consultez toutes vos défenses
-- **Épinglage** : Épinglez vos défenses favorites sur le tableau de bord pour un accès rapide
 - **Système de tags** : Organisez vos défenses avec des étiquettes personnalisées
-- **Notes détaillées** : Ajoutez des notes sur les forces, faiblesses et séquences d'attaque
-- **Visibilité** : Définissez si vos défenses sont publiques ou privées
+- **Notes détaillées** : Ajoutez des notes sur les forces, faiblesses
 - **Votes** : Système de likes/dislikes pour évaluer les défenses
 
 **Accès** : Menu "Défenses" → Créer une nouvelle défense
@@ -61,7 +59,6 @@ L'application offre une interface moderne et intuitive, disponible en français 
 - **Gestion des absences** : Enregistrez les absences des membres de la guilde
 - **Événements personnalisés** : Créez des événements personnalisés avec notes
 - **Vue mensuelle** : Affichage mensuel avec support des événements multi-jours
-- **Segments automatiques** : Les événements s'étalant sur plusieurs semaines sont automatiquement segmentés
 - **Notifications Discord** : Option pour envoyer des notifications Discord lors de la création d'absences
 - **Gestion multi-utilisateurs** : Les administrateurs peuvent créer des événements pour d'autres membres
 
@@ -72,11 +69,22 @@ L'application offre une interface moderne et intuitive, disponible en français 
 - **Plan de guilde** : Visualisez et gérez votre plan de guilde avec une carte interactive
 - **Tours draggables** : Déplacez et redimensionnez les tours directement sur la carte
 - **Assignation de défenses** : Assignez des défenses spécifiques à chaque tour
-- **Gestion des positions** : Sauvegardez automatiquement les positions des tours
 - **Modes de carte** : Support pour carte normale et carte de tournoi
 - **Assignation d'utilisateurs** : Assignez des membres à des tours spécifiques
 
 **Accès** : Menu "Carte"
+
+### 👥 Gestion des affectations
+
+- **Affectation de défenses** : Assignez des défenses spécifiques à plusieurs membres de la guilde
+- **Vérification automatique** : Le système vérifie automatiquement quels membres possèdent les monstres nécessaires pour chaque défense
+- **Affectations multiples** : Assignez une même défense à plusieurs membres simultanément
+- **Gestion des affectations** : Consultez toutes les affectations existantes ou filtrez pour voir uniquement vos affectations
+- **Modification** : Modifiez ou supprimez les affectations existantes
+- **Vue d'ensemble** : Visualisez toutes les défenses assignées avec les monstres et les membres concernés
+- **Permissions** : Contrôle d'accès via la permission `canEditAssignments`
+
+**Accès** : Menu "Gestion" (permission `canEditAssignments` requise pour créer/modifier)
 
 ### 👹 Base de données des monstres
 
