@@ -9,6 +9,7 @@
   [![License](https://img.shields.io/badge/License-Private-red)]()
 </div>
 
+This documentation is available in [French](README.fr.md) and in [English](README.md)
 ---
 ## 🎯 À propos
 
