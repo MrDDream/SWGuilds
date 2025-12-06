@@ -16,11 +16,9 @@
 - [À propos](#-à-propos)
 - [Fonctionnalités](#-fonctionnalités)
 - [Installation rapide avec Docker](#-installation-rapide-avec-docker)
-- [Installation avec Docker Compose (build local)](#-installation-avec-docker-compose-build-local)
 - [Configuration](#-configuration)
 - [Utilisation](#-utilisation)
 - [Technologies utilisées](#-technologies-utilisées)
-- [Structure du projet](#-structure-du-projet)
 - [Maintenance et dépannage](#-maintenance-et-dépannage)
 - [Support](#-support)
 
